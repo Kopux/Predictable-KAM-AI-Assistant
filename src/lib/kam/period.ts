@@ -17,6 +17,8 @@ export function periodRange(period: string, months: string[]): { from: string; t
   if (period === "all" || months.length === 0) return null;
   const sorted = [...months].sort();
   const last = sorted[sorted.length - 1]!;
+  const c = /^custom:(\d{4}-\d{2}):(\d{4}-\d{2})$/.exec(period);
+  if (c) return c[1]! <= c[2]! ? { from: c[1]!, to: c[2]! } : { from: c[2]!, to: c[1]! };
   if (/^\d{4}$/.test(period)) return { from: `${period}-01`, to: `${period}-12` };
   if (period === "ytd") return { from: `${last.slice(0, 4)}-01`, to: last };
   const p = PRESETS.find((x) => x.id === period);
@@ -32,6 +34,13 @@ export function presetAvailable(id: string, months: string[]) {
   return [...months].sort()[0]! <= r.from;
 }
 
+export function monthName(ym: string) {
+  const [y, m] = ym.split("-").map(Number) as [number, number];
+  return new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" });
+}
+
+export const customPeriod = (from: string, to: string) => `custom:${from}:${to}`;
+
 export function inPeriod(month: string, period: string, months: string[]) {
   const r = periodRange(period, months);
   return !r || (month >= r.from && month <= r.to);
@@ -39,5 +48,7 @@ export function inPeriod(month: string, period: string, months: string[]) {
 
 export function periodLabel(period: string) {
   if (period === "all") return "All data";
+  const c = /^custom:(\d{4}-\d{2}):(\d{4}-\d{2})$/.exec(period);
+  if (c) return `${monthName(c[1]!)} – ${monthName(c[2]!)}`;
   return PRESETS.find((p) => p.id === period)?.label ?? period;
 }

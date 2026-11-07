@@ -65,7 +65,7 @@ export function KamProvider({ children }: { children: ReactNode }) {
       data,
       dataReady,
       years,
-      year: years.includes(s.year) || PRESET_IDS.includes(s.year) ? s.year : "all",
+      year: years.includes(s.year) || s.year.startsWith("custom:") || PRESET_IDS.includes(s.year) ? s.year : "all",
       setYear: (year) => set((p) => ({ ...p, year })),
       importData: async (incoming) => {
         const merged = mergeDataset(data, incoming);
