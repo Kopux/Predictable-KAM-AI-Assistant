@@ -127,7 +127,10 @@ export function buildDeck(
         { value: `${fmt(t.waterSaved / 1000)} m³`, label: "fresh water saved vs local laundry" },
         { value: `${t.kg ? (t.water / t.kg).toFixed(1) : "–"} L/kg`, label: "water per kg washed" },
       ],
-      bullets: [`About ${fmt(t.waterSaved / 1000 / 2.5)} Olympic-pool-litres… roughly ${fmt(t.waterSaved / 150)} household days of water`],
+      bullets: [
+        `Equal to about ${fmt(t.waterSaved / 1000 / 2500, 1)} Olympic swimming pools`,
+        "Compared with an outsourced local laundry (allocated estimate)",
+      ],
       talking: {
         sustainability: ["Industrial washing reuses process water — a measurable water-stewardship result."],
         operations: [`${hygiene ? "High wash frequency is needed for hygiene; efficient washing keeps that sustainable." : "Water savings grow with every wash we do instead of local laundry."}`],
