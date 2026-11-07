@@ -1,5 +1,9 @@
-import { useMemo } from "react";
-import { Building2, CalendarRange } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Building2, CalendarRange, CalendarDays, Check, Search } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Button } from "@/components/ui/button";
+import { customPeriod, monthName, periodLabel, periodRange } from "@/lib/kam/period";
 import { ExcelImport } from "./ExcelImport";
 import { AskDataButton } from "./AskData";
 import { useKam } from "@/lib/kam/store";
@@ -20,6 +24,13 @@ export function ContextBar() {
     return { sites: sites.length, months, wearers: [...perSite.values()].reduce((a, b) => a + b, 0) };
   }, [customer, data]);
 
+  const [pickOpen, setPickOpen] = useState(false);
+  const [rangeOpen, setRangeOpen] = useState(false);
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const isCustom = year.startsWith("custom:") || years.includes(year);
+  const cur = periodRange(year, info.months);
+
   const chip = (active: boolean, disabled = false) =>
     cn(
       "rounded-full px-3 py-1.5 text-sm font-medium transition whitespace-nowrap",
@@ -34,16 +45,37 @@ export function ContextBar() {
           <Building2 className="hidden h-6 w-6 text-primary sm:block" />
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Customer account</p>
-            <Select value={customer.customer_id} onValueChange={setCustomer}>
-              <SelectTrigger className="h-auto w-[min(300px,80vw)] border-0 bg-transparent p-0 font-display text-xl font-bold shadow-none focus:ring-0" aria-label="Customer account">
-                <SelectValue>{customer.customer_name}</SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {data.customers.map((c) => (
-                  <SelectItem key={c.customer_id} value={c.customer_id}>{c.customer_name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Popover open={pickOpen} onOpenChange={setPickOpen}>
+              <PopoverTrigger asChild>
+                <button aria-label="Customer account" className="flex w-[min(300px,80vw)] items-center gap-2 text-left font-display text-xl font-bold">
+                  <span className="truncate">{customer.customer_name}</span>
+                  <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[min(360px,90vw)] p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Search company, industry or ID…" />
+                  <CommandList>
+                    <CommandEmpty>No company found.</CommandEmpty>
+                    <CommandGroup heading={`${data.customers.length} companies`}>
+                      {data.customers.map((c) => (
+                        <CommandItem
+                          key={c.customer_id}
+                          value={`${c.customer_name} ${c.industry} ${c.customer_id}`}
+                          onSelect={() => { setCustomer(c.customer_id); setPickOpen(false); }}
+                        >
+                          <Check className={cn("h-4 w-4", c.customer_id === customer.customer_id ? "opacity-100" : "opacity-0")} />
+                          <div className="min-w-0">
+                            <p className="truncate font-medium">{c.customer_name}</p>
+                            <p className="truncate text-xs text-muted-foreground">{c.industry}</p>
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
             <p className="text-xs text-muted-foreground">
               {customer.industry} · {info.sites} sites · {info.wearers.toLocaleString()} wearers
             </p>
@@ -62,9 +94,36 @@ export function ContextBar() {
                 </button>
               );
             })}
-            {years.map((y) => (
-              <button key={y} role="radio" aria-checked={year === y} onClick={() => setYear(y)} className={chip(year === y)}>{y}</button>
-            ))}
+            <Popover open={rangeOpen} onOpenChange={(o) => { setRangeOpen(o); if (o) { setFrom(cur?.from ?? info.months[0] ?? ""); setTo(cur?.to ?? info.months.at(-1) ?? ""); } }}>
+              <PopoverTrigger asChild>
+                <button role="radio" aria-checked={isCustom} disabled={info.months.length === 0} className={cn(chip(isCustom, info.months.length === 0), "flex items-center gap-1")}>
+                  <CalendarDays className="h-3.5 w-3.5" />
+                  {isCustom ? periodLabel(year) : "Custom"}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-72 space-y-3" align="start">
+                <p className="font-display font-semibold">Choose months</p>
+                {years.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {years.map((y) => (
+                      <button key={y} onClick={() => { setYear(y); setRangeOpen(false); }} className={cn("rounded-full border px-2.5 py-1 text-xs", year === y && "border-primary bg-primary text-primary-foreground")}>{y}</button>
+                    ))}
+                  </div>
+                )}
+                {(["From", "To"] as const).map((lbl) => (
+                  <label key={lbl} className="flex items-center justify-between gap-2 text-sm">
+                    {lbl}
+                    <Select value={lbl === "From" ? from : to} onValueChange={lbl === "From" ? setFrom : setTo}>
+                      <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {info.months.map((m) => <SelectItem key={m} value={m}>{monthName(m)}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </label>
+                ))}
+                <Button className="w-full" disabled={!from || !to} onClick={() => { setYear(customPeriod(from, to)); setRangeOpen(false); }}>Apply</Button>
+              </PopoverContent>
+            </Popover>
             <button role="radio" aria-checked={year === "all"} onClick={() => setYear("all")} className={chip(year === "all")}>All</button>
           </div>
         </div>
