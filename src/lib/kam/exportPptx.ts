@@ -5,9 +5,9 @@ export async function exportPptx(customerName: string, summary: string, slides: 
   const { default: PptxGenJS } = await import("pptxgenjs");
   const pptx = new PptxGenJS();
   pptx.layout = "LAYOUT_WIDE";
-  const BG = "00205B";
+  const BG = "222222";
   const FG = "FFFFFF";
-  const ACC = "4FB3E8";
+  const ACC = "E52330";
   const banner = isSample ? "SYNTHETIC DEMO DATA · Not audited" : "DRAFT · KAM must review before customer use";
 
   const title = pptx.addSlide();
