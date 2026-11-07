@@ -5,7 +5,8 @@ import { ContextBar } from "./ContextBar";
 import { AskDataButton } from "./AskData";
 import { cn } from "@/lib/utils";
 import { useKam } from "@/lib/kam/store";
-import { FileSpreadsheet } from "lucide-react";
+import { Building2, FileSpreadsheet } from "lucide-react";
+import { periodLabel } from "@/lib/kam/period";
 import { Button } from "@/components/ui/button";
 
 const STEPS = [
@@ -18,7 +19,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const advanced = pathname.startsWith("/advanced");
-  const { data, dataReady } = useKam();
+  const { data, dataReady, customer, year } = useKam();
 
   return (
     <div className="min-h-screen">
@@ -83,6 +84,13 @@ export function AppShell({ children }: { children: ReactNode }) {
         )}
         <ContextBar />
       </header>
+      {data.customers.length > 0 && (
+        <div className="no-print sticky top-0 z-30 flex items-center gap-2 border-b border-border/40 bg-background/90 px-4 py-2 text-sm backdrop-blur-md md:hidden">
+          <Building2 className="h-4 w-4 shrink-0 text-primary" />
+          <span className="min-w-0 truncate font-display font-bold">{customer.customer_name}</span>
+          <span className="ml-auto shrink-0 rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">{periodLabel(year)}</span>
+        </div>
+      )}
       <main className="mx-auto max-w-7xl px-4 py-6">{dataReady && data.customers.length === 0 ? <div className="py-12 text-center"><FileSpreadsheet className="mx-auto mb-4 h-10 w-10 text-primary" /><h1 className="font-display text-2xl font-bold">No company data</h1><p className="mt-2 text-muted-foreground">Import an Excel workbook to start a meeting.</p></div> : children}</main>
       {data.customers.length > 0 && <div className="sm:hidden"><AskDataButton floating /></div>}
     </div>
