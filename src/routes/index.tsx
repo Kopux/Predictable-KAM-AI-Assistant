@@ -165,7 +165,7 @@ function Pulse() {
         </div>
 
         <div className="lg:col-span-3">
-          <Section title="Utilisation by site" desc="Green zone = healthy band. Other bars sit outside it.">
+          <Section title="Utilisation by site" desc="Green zone = healthy band. Light-blue bars sit outside it.">
             <div className="h-[340px]">
               <ResponsiveContainer>
                 <BarChart data={sites.map((s) => ({ name: s.name.replace(customer.customer_name.split(" ")[0] ?? "", "").trim(), u: +s.utilisation.toFixed(1) }))} margin={{ left: -10, bottom: 50 }}>
