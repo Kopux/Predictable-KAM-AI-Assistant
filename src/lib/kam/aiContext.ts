@@ -1,4 +1,5 @@
 import type { Dataset } from "./data";
+import { periodLabel } from "./period";
 import type { Attendee, Priority } from "./context";
 import { customerRows, totals, siteStats, outliers, monthlyTrend, groupBy, productGroup, type Band } from "./metrics";
 
