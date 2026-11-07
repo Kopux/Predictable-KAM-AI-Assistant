@@ -45,8 +45,10 @@ function Pulse() {
   const productById = Object.fromEntries(data.products.map((p) => [p.product_id, p]));
   const siteById = Object.fromEntries(data.sites.map((p) => [p.site_id, p]));
   const period = [...new Set(rs.map((r) => r.month.slice(0, 4)))].sort().join(", ");
-  const h1 = totals(rs.filter((r) => Number(r.month.slice(5)) <= 6), data);
-  const h2 = totals(rs.filter((r) => Number(r.month.slice(5)) > 6), data);
+  const ms = [...new Set(rs.map((r) => r.month))].sort();
+  const mid = ms[Math.floor(ms.length / 2)] ?? "";
+  const h1 = totals(rs.filter((r) => r.month < mid), data);
+  const h2 = totals(rs.filter((r) => r.month >= mid), data);
   const sites = siteStats(rs, data).sort((a, b) => a.utilisation - b.utilisation);
   const outs = outliers(rs, band, data);
   const exceptions = exceptionRows(all, band);
@@ -63,7 +65,7 @@ function Pulse() {
           <p className="text-sm font-semibold uppercase tracking-wider text-accent">Step 1 · Account Pulse</p>
           <h1 className="text-4xl font-extrabold">{customer.customer_name}</h1>
           <p className="text-muted-foreground">
-            {customer.industry} · {customer.segment} · {sites.length} sites · {period} · changes shown are Jul–Dec vs Jan–Jun
+            {customer.industry} · {customer.segment} · {sites.length} sites · {period} · changes compare the second half of the period with the first
           </p>
         </div>
         <Button asChild size="lg">

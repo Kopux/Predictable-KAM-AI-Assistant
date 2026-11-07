@@ -11,6 +11,8 @@ import {
   type Dataset,
 } from "./data";
 
+import { inPeriod } from "./period";
+
 export const WEEKS_PER_MONTH = 52 / 12;
 
 /** Default healthy utilisation band (weekly washes ÷ allocated garments). */
@@ -129,7 +131,9 @@ export function totals(rs: Row[], data: Dataset = sampleDataset): Totals {
 
 export function customerRows(customerId: string, excluded: Set<number>, data: Dataset = sampleDataset, year = "all") {
   const ids = new Set(data.sites.filter((s) => s.customer_id === customerId).map((s) => s.site_id));
-  return data.rows.filter((r) => ids.has(r.site) && !excluded.has(r.id) && (year === "all" || r.month.startsWith(year)));
+  const own = data.rows.filter((r) => ids.has(r.site));
+  const ms = [...new Set(own.map((r) => r.month))];
+  return own.filter((r) => !excluded.has(r.id) && inPeriod(r.month, year, ms));
 }
 
 export function allCustomerRows(customerId: string, data: Dataset = sampleDataset, year = "all") {

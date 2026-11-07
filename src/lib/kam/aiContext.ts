@@ -21,7 +21,7 @@ export function buildAiContext(opts: {
   return {
     account: opts.customerName,
     industry: opts.industry,
-    period: year === "all" ? "all available months" : year,
+    period: year === "all" ? "all available months" : periodLabel(year),
     healthyUtilisationBandPct: band,
     excludedExceptionLines: excluded.size,
     meeting: { attendees: opts.attendees, priorities: opts.priorities },
