@@ -129,7 +129,7 @@ export function ContextBar() {
         </div>
 
         <div className="lg:ml-auto">
-          <AskDataButton />
+          {data.customers.length > 0 && <AskDataButton />}
         </div>
       </div>
     </div>
