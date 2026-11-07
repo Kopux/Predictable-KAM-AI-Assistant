@@ -21,8 +21,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen">
-      <header className="no-print sticky top-0 z-30 border-b border-border/40 bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3">
+      <header className="no-print relative z-30 md:sticky md:top-0 border-b border-border/40 bg-background/80 backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2 sm:py-3">
           <Link to="/" className="flex items-center gap-2">
             <span className="brand-badge grid h-10 w-10 place-items-center rounded-lg shadow-sm">
               <Shirt className="h-5 w-5" />
@@ -33,13 +33,13 @@ export function AppShell({ children }: { children: ReactNode }) {
             </span>
           </Link>
 
-          <div className="ml-auto flex flex-wrap items-center gap-3">
+          <div className="ml-auto flex shrink-0 items-center gap-3">
             <div role="tablist" aria-label="Mode" className="flex rounded-full border bg-card p-1 text-sm">
               <Button variant="ghost"
                 role="tab"
                 aria-selected={!advanced}
                 onClick={() => navigate({ to: "/" })}
-                className={cn("rounded-full px-4 py-1.5 font-medium transition", !advanced ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}
+                className={cn("rounded-full px-3 py-1.5 font-medium transition sm:px-4", !advanced ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}
               >
                 Default
               </Button>
@@ -47,7 +47,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 role="tab"
                 aria-selected={advanced}
                 onClick={() => navigate({ to: "/advanced" })}
-                className={cn("flex items-center gap-1.5 rounded-full px-4 py-1.5 font-medium transition", advanced ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}
+                className={cn("flex items-center gap-1.5 rounded-full px-3 py-1.5 font-medium transition sm:px-4", advanced ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}
               >
                 <BarChart3 className="h-3.5 w-3.5" /> Advanced
               </Button>
@@ -56,7 +56,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
 
         {!advanced && (
-          <nav className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-4 pb-4 pt-1" aria-label="Meeting steps">
+          <nav className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-4 pb-2 pt-1 sm:pb-4" aria-label="Meeting steps">
             {STEPS.map((s, i) => {
               const active = pathname === s.to;
               const Icon = s.icon;
