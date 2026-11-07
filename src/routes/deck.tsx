@@ -14,9 +14,9 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/deck")({
   head: () => ({
     meta: [
-      { title: "Client Deck & Talking Points — KAM Meeting Assistant" },
+      { title: "Client Deck & Talking Points — Lindström KAM Assistant" },
       { name: "description", content: "Client-ready slides, executive summary and talking points matched to meeting attendees." },
-      { property: "og:title", content: "Client Deck & Talking Points — KAM Meeting Assistant" },
+      { property: "og:title", content: "Client Deck & Talking Points — Lindström KAM Assistant" },
       { property: "og:description", content: "Preview, tailor and export the customer review deck." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

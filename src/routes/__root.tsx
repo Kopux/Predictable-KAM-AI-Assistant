@@ -84,9 +84,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "KAM Meeting Assistant" },
+      { title: "Lindström KAM Assistant" },
       { name: "description", content: "Prepare customer reviews for workwear rental accounts in three steps." },
-      { property: "og:title", content: "KAM Meeting Assistant" },
+      { property: "og:title", content: "Lindström KAM Assistant" },
       { property: "og:description", content: "Prepare customer reviews for workwear rental accounts in three steps." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -96,7 +96,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter+Tight:wght@400;500;600;700&display=swap",
       },
       {
         rel: "stylesheet",

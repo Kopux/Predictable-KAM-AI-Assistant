@@ -26,9 +26,9 @@ import { Badge } from "@/components/ui/badge";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Account Pulse — KAM Meeting Assistant" },
+      { title: "Account Pulse — Lindström KAM Assistant" },
       { name: "description", content: "Health check of a workwear rental account: garments, washing, repairs, cost and environmental impact." },
-      { property: "og:title", content: "Account Pulse — KAM Meeting Assistant" },
+      { property: "og:title", content: "Account Pulse — Lindström KAM Assistant" },
       { property: "og:description", content: "Health check of a workwear rental account before the customer meeting." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

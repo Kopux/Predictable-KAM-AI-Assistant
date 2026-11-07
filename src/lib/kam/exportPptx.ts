@@ -5,9 +5,9 @@ export async function exportPptx(customerName: string, summary: string, slides: 
   const { default: PptxGenJS } = await import("pptxgenjs");
   const pptx = new PptxGenJS();
   pptx.layout = "LAYOUT_WIDE";
-  const BG = "1F3B4A";
-  const FG = "F6F3EC";
-  const ACC = "F2A43A";
+  const BG = "00205B";
+  const FG = "FFFFFF";
+  const ACC = "4FB3E8";
 
   const title = pptx.addSlide();
   title.background = { color: BG };
