@@ -28,8 +28,8 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Shirt className="h-5 w-5" />
             </span>
             <span className="leading-none">
-              <span className="block font-display text-lg font-extrabold text-foreground">Lindström</span>
-              <span className="mt-1 block text-[10px] font-semibold uppercase text-muted-foreground">KAM Assistant</span>
+              <span className="block font-display text-lg font-extrabold text-foreground">Predictable</span>
+              <span className="mt-1 block text-[10px] font-semibold uppercase text-muted-foreground">KAM AI Assistant</span>
             </span>
           </Link>
 

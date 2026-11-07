@@ -84,9 +84,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lindström KAM Assistant" },
+      { title: "Predictable KAM AI Assistant" },
       { name: "description", content: "Prepare customer reviews for workwear rental accounts in three steps." },
-      { property: "og:title", content: "Lindström KAM Assistant" },
+      { property: "og:title", content: "Predictable KAM AI Assistant" },
       { property: "og:description", content: "Prepare customer reviews for workwear rental accounts in three steps." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

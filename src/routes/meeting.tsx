@@ -11,9 +11,9 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/meeting")({
   head: () => ({
     meta: [
-      { title: "Meeting Customizer — Lindström KAM Assistant" },
+      { title: "Meeting Customizer — Predictable KAM AI Assistant" },
       { name: "description", content: "Tailor the customer review to who is in the room and what they care about." },
-      { property: "og:title", content: "Meeting Customizer — Lindström KAM Assistant" },
+      { property: "og:title", content: "Meeting Customizer — Predictable KAM AI Assistant" },
       { property: "og:description", content: "Pick attendees and priorities to shape the customer review deck." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
