@@ -147,4 +147,15 @@ describe("private Excel import", () => {
     w.Sheets["Sites"] = XLSX.utils.json_to_sheet([...records, { ...first }]);
     expect(parseWorkbook(buffer(w), sampleDataset).errors).toContain("Sites, row 3: duplicate site_id S034.");
   });
+  it("treats casing and extra spaces as the same existing customer name", () => {
+    const w = workbook();
+    const sheet = w.Sheets["Customers"];
+    if (!sheet) throw new Error("Missing Customers");
+    const records = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet);
+    for (const r of records) r["customer_name"] = `  ${String(r["customer_name"]).toUpperCase().replace(/ /g, "  ")}  `;
+    w.Sheets["Customers"] = XLSX.utils.json_to_sheet(records);
+    const result = parseWorkbook(buffer(w), sampleDataset);
+    expect(result.errors).toEqual([]);
+    expect(result.data.customers[0]?.customer_id).toBe("CUST001");
+  });
 });
