@@ -120,7 +120,7 @@ export function parseWorkbook(buffer: ArrayBuffer, existing: Dataset): ImportPre
   if (!workbook.Sheets["Waste_Circularity"]) warnings.push("No Waste_Circularity worksheet: recycling claims will be omitted for imported rows.");
   const resultRows = [...map.values()].map((r, id) => {
     const w = get("Waste_Circularity").find((w) => text(w["month"]) === r["month"] && text(w["laundry_id"]) === r["laundry"]);
-    return { ...r, id, recycledKg: w && num(w["textile_waste_total_kg"]) > 0 ? r["textile"]Waste * (num(w["recycling_kg"]) + num(w["reuse_kg"])) / num(w["textile_waste_total_kg"]) : undefined };
+    return { ...r, id, recycledKg: w && num(w["textile_waste_total_kg"]) > 0 ? r.textileWaste * (num(w["recycling_kg"]) + num(w["reuse_kg"])) / num(w["textile_waste_total_kg"]) : undefined };
   });
   if (!resultRows.length) errors.push("Service_Activity contains no data rows.");
   const oldKeys = new Set(existing.rows.map(rowKey));
