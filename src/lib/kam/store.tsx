@@ -2,6 +2,7 @@ import { useContext, useEffect, useMemo, useState, type ReactNode } from "react"
 import { sampleDataset, mergeDataset } from "./data";
 import { readLocalDataset, saveLocalDataset } from "./localDataset";
 import { defaultBandFor, findCustomer } from "./metrics";
+import { PRESETS } from "./period";
 import { KamContext, type KamState, type State, type Attendee, type Priority } from "./context";
 
 export type { Attendee, Priority } from "./context";
@@ -19,6 +20,7 @@ export const PRIORITIES: { id: Priority; label: string }[] = [
   { id: "hygiene", label: "Hygiene standards" },
 ];
 
+const PRESET_IDS: string[] = PRESETS.map((p) => p.id);
 const KEY = "kam-assistant-v1";
 const initial: State = {
   year: "all",
@@ -63,7 +65,7 @@ export function KamProvider({ children }: { children: ReactNode }) {
       data,
       dataReady,
       years,
-      year: years.includes(s.year) ? s.year : "all",
+      year: years.includes(s.year) || PRESET_IDS.includes(s.year) ? s.year : "all",
       setYear: (year) => set((p) => ({ ...p, year })),
       importData: async (incoming) => {
         const merged = mergeDataset(data, incoming);

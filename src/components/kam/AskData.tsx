@@ -99,8 +99,8 @@ export function AskDataButton() {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline" className="bg-card">
-          <MessageCircleQuestion className="mr-1 h-4 w-4" /> Ask
+        <Button className="bg-accent text-accent-foreground shadow-md hover:bg-accent/90">
+          <MessageCircleQuestion className="mr-1 h-4 w-4" /> Ask AI about this account
         </Button>
       </SheetTrigger>
       <SheetContent className="flex w-full flex-col sm:max-w-lg">

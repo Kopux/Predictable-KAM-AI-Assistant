@@ -5,3 +5,7 @@
 - [x] Test parsing, merging, metrics and the complete upload workflow.
 - [x] Resolve reused customer IDs and scope site IDs per customer across workbook sheets.
 - [x] Verify collision imports, repeat imports and the meeting workflow.
+# Hackathon (Lindström)
+- [x] Phase 1: Context Bar (company, import, period presets, prominent Ask AI).
+- [ ] Phase 2: user tags `v2-generic` in GitHub (waiting on user).
+- [ ] Phase 3: Lindström name, colours, font (after Phase 2).

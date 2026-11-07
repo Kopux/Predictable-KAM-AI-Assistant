@@ -1,4 +1,5 @@
 import type { Dataset } from "./data";
+import { periodLabel } from "./period";
 import type { Attendee, Priority } from "./context";
 import { customerRows, totals, siteStats, outliers, monthlyTrend, groupBy, productGroup, type Band } from "./metrics";
 
@@ -21,7 +22,7 @@ export function buildAiContext(opts: {
   return {
     account: opts.customerName,
     industry: opts.industry,
-    period: year === "all" ? "all available months" : year,
+    period: year === "all" ? "all available months" : periodLabel(year),
     healthyUtilisationBandPct: band,
     excludedExceptionLines: excluded.size,
     meeting: { attendees: opts.attendees, priorities: opts.priorities },
