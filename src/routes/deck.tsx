@@ -1,11 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { ArrowLeft, ChevronLeft, ChevronRight, ClipboardCopy, Download, Eye, EyeOff, MessageSquareQuote, Printer } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, ClipboardCopy, Download, Eye, EyeOff, FileSpreadsheet, MessageSquareQuote, Printer } from "lucide-react";
 import { ATTENDEES, useKam } from "@/lib/kam/store";
 import { customerRows } from "@/lib/kam/metrics";
+import { sampleDataset } from "@/lib/kam/data";
 import { buildDeck } from "@/lib/kam/story";
 import { exportPptx } from "@/lib/kam/exportPptx";
+import { copilotPrompt, exportCopilotWorkbook } from "@/lib/kam/exportCopilot";
 import { getChatSession, sessionTranscript } from "@/lib/kam/chatSession";
 import { SlideView } from "@/components/kam/SlideView";
 import { Button } from "@/components/ui/button";
@@ -33,6 +35,7 @@ function Deck() {
     [rows, customer, band, attendees, priorities, data],
   );
   const visible = deck.slides.filter((s) => !hiddenSlides.includes(s.id));
+  const isSample = useMemo(() => sampleDataset.customers.some((c) => c.customer_id === customer.customer_id), [customer]);
   const [cur, setCur] = useState(0);
   const idx = Math.min(cur, Math.max(visible.length - 1, 0));
   const slide = visible[idx];
