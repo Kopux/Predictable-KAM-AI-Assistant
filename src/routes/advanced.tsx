@@ -4,6 +4,7 @@ import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContai
 import { useKam } from "@/lib/kam/store";
 import { customerRows, fmt, fmtK, groupBy, laundryName, monthlyTrend, productGroup, siteStats, type SiteStat } from "@/lib/kam/metrics";
 import { repairTypes, siteById, waste } from "@/lib/kam/data";
+import { AskDataChat } from "@/components/kam/AskData";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Section } from "@/components/kam/bits";
 
@@ -72,7 +73,12 @@ function Advanced() {
           <TabsTrigger value="products">Garment types</TabsTrigger>
           <TabsTrigger value="repairs">Repairs</TabsTrigger>
           <TabsTrigger value="circular">Circularity</TabsTrigger>
+          <TabsTrigger value="ask">Ask the data</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="ask">
+          <AskDataChat className="h-[70vh]" />
+        </TabsContent>
 
         <TabsContent value="sites">
           <Section title="All sites" desc="Click a column to sort.">

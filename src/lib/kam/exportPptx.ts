@@ -1,7 +1,7 @@
 import type { Slide } from "./story";
 import { ATTENDEES, type Attendee } from "./store";
 
-export async function exportPptx(customerName: string, summary: string, slides: Slide[], attendees: Attendee[]) {
+export async function exportPptx(customerName: string, summary: string, slides: Slide[], attendees: Attendee[], aiSession?: string) {
   const { default: PptxGenJS } = await import("pptxgenjs");
   const pptx = new PptxGenJS();
   pptx.layout = "LAYOUT_WIDE";
@@ -34,6 +34,14 @@ export async function exportPptx(customerName: string, summary: string, slides: 
       .join("\n");
     if (notes) sl.addNotes(notes);
   });
+
+  if (aiSession) {
+    const qa = pptx.addSlide();
+    qa.background = { color: BG };
+    qa.addText("AI DATA Q&A (PREP NOTES)", { x: 0.6, y: 0.4, w: 12, fontSize: 12, color: ACC, bold: true });
+    qa.addText(aiSession.slice(0, 2500), { x: 0.6, y: 0.9, w: 12, h: 6.2, fontSize: 11, color: FG, valign: "top" });
+    qa.addNotes(aiSession);
+  }
 
   await pptx.writeFile({ fileName: `${customerName.replace(/\s+/g, "_")}_review_2025.pptx` });
 }

@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { Activity, BarChart3, Presentation, Users, Shirt } from "lucide-react";
 import { ExcelImport } from "./ExcelImport";
+import { AskDataButton } from "./AskData";
 import { useKam } from "@/lib/kam/store";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
@@ -32,6 +33,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Link>
 
           <div className="ml-auto flex flex-wrap items-center gap-3">
+            <AskDataButton />
             <ExcelImport />
             <Select value={customer.customer_id} onValueChange={setCustomer}>
               <SelectTrigger className="w-[240px] bg-card" aria-label="Customer account">
