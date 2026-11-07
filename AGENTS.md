@@ -28,3 +28,7 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+- Sample data lives in `src/data/pack.json`, pre-aggregated (month × site × product) from the reference `pack.xlsx`; all metrics are computed client-side in `src/lib/kam/metrics.ts` so excluding rows never mutates source data.
+- Meeting state (account, exclusions, band overrides, attendees, priorities) lives in `KamProvider` (localStorage) so it persists across the 3 steps and Advanced mode.
