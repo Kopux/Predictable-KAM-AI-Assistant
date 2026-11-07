@@ -13,5 +13,5 @@
 - [x] Phase 3: Lindström name, colours, font (after Phase 2).
 
 # Presentation graphs
-- [ ] Include the displayed graphs in PowerPoint without changing calculations.
-- [ ] Make PDF graphs ready before printing and verify downloaded files.
+- [x] Include the displayed graphs in PowerPoint without changing calculations.
+- [x] Make PDF graphs ready before printing and verify downloaded files.
