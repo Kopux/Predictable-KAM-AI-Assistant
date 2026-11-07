@@ -24,7 +24,7 @@ export const PRIORITIES: { id: Priority; label: string }[] = [
 const PRESET_IDS: string[] = PRESETS.map((p) => p.id);
 const KEY = "kam-assistant-v1";
 const initial: State = {
-  year: "all",
+  year: "last12",
   customerId: findCustomer("", sampleDataset).customer_id,
   excluded: [],
   bands: {},
@@ -66,7 +66,7 @@ export function KamProvider({ children }: { children: ReactNode }) {
       data,
       dataReady,
       years,
-      year: years.includes(s.year) || s.year.startsWith("custom:") || PRESET_IDS.includes(s.year) ? s.year : "all",
+      year: years.includes(s.year) || s.year.startsWith("custom:") || PRESET_IDS.includes(s.year) ? s.year : "last12",
       setYear: (year) => set((p) => ({ ...p, year })),
       importData: async (incoming) => {
         const merged = mergeDataset(data, incoming);
@@ -80,13 +80,13 @@ export function KamProvider({ children }: { children: ReactNode }) {
         const empty = emptyDataset();
         await saveLocalDataset(empty);
         setData(empty);
-        set((p) => ({ ...p, customerId: "", year: "all", excluded: [], bands: {} }));
+        set((p) => ({ ...p, customerId: "", year: "last12", excluded: [], bands: {} }));
       },
       removeDatasets: async (keys) => {
         const remaining = removeDataGroups(data, keys);
         await saveLocalDataset(remaining);
         setData(remaining);
-        set((p) => ({ ...p, customerId: findCustomer(p.customerId, remaining).customer_id, year: "all", excluded: p.excluded.filter((id) => remaining.rows.some((r) => r.id === id)) }));
+        set((p) => ({ ...p, customerId: findCustomer(p.customerId, remaining).customer_id, year: "last12", excluded: p.excluded.filter((id) => remaining.rows.some((r) => r.id === id)) }));
       },
       customer,
       band: s.bands[customer.customer_id] ?? defaultBandFor(customer.industry),
