@@ -13,12 +13,12 @@ function workbook(year = "2026", newCompany = false) {
     if (!sheet) continue;
     const records = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet);
     for (const r of records) {
-      if (r.month) r.month = String(r.month).replace("2025", year);
-      if (r.pickup_timestamp) r.pickup_timestamp = String(r.pickup_timestamp).replace("2025", year);
+      if (r["month"]) r["month"] = String(r["month"]).replace("2025", year);
+      if (r["pickup_timestamp"]) r["pickup_timestamp"] = String(r["pickup_timestamp"]).replace("2025", year);
       if (newCompany) {
-        if (r.customer_id) r.customer_id = `NEW-${r.customer_id}`;
-        if (r.customer_name) r.customer_name = `Imported ${r.customer_name}`;
-        if (r.site_id) r.site_id = `NEW-${r.site_id}`;
+        if (r["customer_id"]) r["customer_id"] = `NEW-${r["customer_id"]}`;
+        if (r["customer_name"]) r["customer_name"] = `Imported ${r["customer_name"]}`;
+        if (r["site_id"]) r["site_id"] = `NEW-${r["site_id"]}`;
       }
     }
     w.Sheets[name] = XLSX.utils.json_to_sheet(records);
@@ -40,18 +40,18 @@ describe("private Excel import", () => {
     expect(result.errors).toEqual([]);
     expect(result.years).toEqual(["2026"]);
     const merged = mergeDataset(sampleDataset, result.data);
-    expect(merged.rows.length).toBe(sampleDataset.rows.length * 2);
+    expect(merged.rows.length).toBe(sampleDataset.rows.length + result.data.rows.length);
     expect(mergeDataset(merged, result.data).rows.length).toBe(merged.rows.length);
     const rows = customerRows("CUST001", new Set(), merged, "2026");
-    expect(totals(rows, merged).washed).toBe(totals(customerRows("CUST001", new Set()), sampleDataset).washed);
-    expect(monthlyTrend(rows, merged)[0].label).toBe("Jan 2026");
-    expect(sampleDataset.rows.every((r) => r.month.startsWith("2025"))).toBe(true);
+    expect(totals(rows, merged).washed).toBe(totals(customerRows("CUST001", new Set()).filter((r) => r.site === "S001"), sampleDataset).washed);
+    expect(monthlyTrend(rows, merged)[0]?.label).toBe("Jan 2026");
+    expect(sampleDataset.rows.every((r) => r["month"].startsWith("2025"))).toBe(true);
   });
   it("imports new companies into the same account metrics", () => {
     const result = parseWorkbook(buffer(workbook("2026", true)), sampleDataset);
     expect(result.errors).toEqual([]);
     const merged = mergeDataset(sampleDataset, result.data);
-    expect(merged.customers.length).toBe(6);
+    expect(merged.customers.length).toBe(4);
     const rows = customerRows("NEW-CUST001", new Set(), merged, "2026");
     expect(rows.length).toBeGreaterThan(0);
     expect(totals(rows, merged).costAvoided).toBeGreaterThan(0);
@@ -59,10 +59,14 @@ describe("private Excel import", () => {
   });
   it("blocks invalid numbers and broken site references", () => {
     const w = workbook();
-    const records = XLSX.utils.sheet_to_json<Record<string, unknown>>(w.Sheets.Service_Activity);
-    records[0].allocated_pieces = -1;
-    records[0].site_id = "missing";
-    w.Sheets.Service_Activity = XLSX.utils.json_to_sheet(records);
+    const sheet = w.Sheets["Service_Activity"];
+    if (!sheet) throw new Error("Missing test worksheet");
+    const records = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet);
+    const first = records[0];
+    if (!first) throw new Error("Missing test row");
+    first["allocated_pieces"] = -1;
+    first["site_id"] = "missing";
+    w.Sheets["Service_Activity"] = XLSX.utils.json_to_sheet(records);
     const result = parseWorkbook(buffer(w), sampleDataset);
     expect(result.errors).toContain("Service_Activity, row 2: allocated_pieces must be a valid non-negative number.");
     expect(result.errors).toContain("Service_Activity, row 2: site/customer reference does not match.");

@@ -48,14 +48,14 @@ export function SlideChart({ slide, rows, band, data = sampleDataset }: { slide:
   }
   if (slide.chart === "circular") {
     const t = totals(rows, data);
-    const data = [
+    const pieData = [
       { n: "Recycled / reused", v: t.recycledKg },
       { n: "Other recovery", v: t.textileWaste - t.recycledKg },
     ];
     return (
       <ResponsiveContainer>
         <PieChart>
-          <Pie data={data} dataKey="v" innerRadius="55%" outerRadius="85%" stroke="none">
+          <Pie data={pieData} dataKey="v" innerRadius="55%" outerRadius="85%" stroke="none">
             <Cell fill="var(--success)" />
             <Cell fill="var(--slide-foreground)" fillOpacity={0.3} />
           </Pie>
