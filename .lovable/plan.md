@@ -13,7 +13,7 @@
 - GitHub is already connected, so Phase 1 syncs automatically.
 - In GitHub, create a tag or branch called `v2-generic` from the latest commit. It keeps the improved, unbranded version for your repo.
 
-## Phase 3: Company-presentable version (Lindström, please confirm the spelling)
+## Phase 3: Company-presentable version (Lindström)
 - Name: "Lindström KAM Assistant" in the header and page titles.
 - Colours: Lindström-style deep blue as the main colour, a bright light-blue accent, a clean white/light-grey background, and a matching dark mode.
 - Font: a clean Scandinavian-style sans font (for example Manrope).
