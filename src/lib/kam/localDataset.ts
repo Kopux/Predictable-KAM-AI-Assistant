@@ -1,4 +1,4 @@
-import type { Dataset } from "./data";
+import { mergeDataset, sampleDataset, type Dataset } from "./data";
 
 function open(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -13,8 +13,14 @@ export async function readLocalDataset(): Promise<Dataset | undefined> {
   const db = await open();
   return new Promise((resolve, reject) => {
     const transaction = db.transaction("datasets", "readonly");
-    const request = transaction.objectStore("datasets").get("imports");
-    request.onsuccess = () => resolve(request.result);
+    const store = transaction.objectStore("datasets");
+    const request = store.get("active");
+    request.onsuccess = () => {
+      if (request.result) { resolve(request.result); return; }
+      const legacy = store.get("imports");
+      legacy.onsuccess = () => resolve(legacy.result ? mergeDataset(sampleDataset, legacy.result) : undefined);
+      legacy.onerror = () => reject(legacy.error);
+    };
     request.onerror = () => reject(request.error);
     transaction.oncomplete = () => db.close();
   });
@@ -34,7 +40,7 @@ export async function saveLocalDataset(data: Dataset): Promise<void> {
   const db = await open();
   return new Promise((resolve, reject) => {
     const transaction = db.transaction("datasets", "readwrite");
-    transaction.objectStore("datasets").put(data, "imports");
+    transaction.objectStore("datasets").put(data, "active");
     transaction.oncomplete = () => { db.close(); resolve(); };
     transaction.onerror = () => { db.close(); reject(transaction.error); };
   });

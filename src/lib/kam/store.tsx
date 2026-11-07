@@ -1,6 +1,7 @@
 import { useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { sampleDataset, mergeDataset } from "./data";
-import { readLocalDataset, saveLocalDataset, clearLocalDataset } from "./localDataset";
+import { readLocalDataset, saveLocalDataset } from "./localDataset";
+import { emptyDataset, removeDataGroups } from "./dataRemoval";
 import { defaultBandFor, findCustomer } from "./metrics";
 import { PRESETS } from "./period";
 import { KamContext, type KamState, type State, type Attendee, type Priority } from "./context";
@@ -39,7 +40,7 @@ export function KamProvider({ children }: { children: ReactNode }) {
   const [dataReady, setDataReady] = useState(false);
 
   useEffect(() => {
-    readLocalDataset().then((saved) => { if (saved) setData(mergeDataset(sampleDataset, saved)); }).catch(() => {}).finally(() => setDataReady(true));
+    readLocalDataset().then((saved) => { if (saved) setData(saved); }).catch(() => {}).finally(() => setDataReady(true));
   }, []);
 
   useEffect(() => {
@@ -76,9 +77,16 @@ export function KamProvider({ children }: { children: ReactNode }) {
       },
       hasImports: data !== sampleDataset,
       clearImports: async () => {
-        await clearLocalDataset();
-        setData(sampleDataset);
-        set((p) => ({ ...p, customerId: findCustomer(p.customerId, sampleDataset).customer_id, year: "all", excluded: [] }));
+        const empty = emptyDataset();
+        await saveLocalDataset(empty);
+        setData(empty);
+        set((p) => ({ ...p, customerId: "", year: "all", excluded: [], bands: {} }));
+      },
+      removeDatasets: async (keys) => {
+        const remaining = removeDataGroups(data, keys);
+        await saveLocalDataset(remaining);
+        setData(remaining);
+        set((p) => ({ ...p, customerId: findCustomer(p.customerId, remaining).customer_id, year: "all", excluded: p.excluded.filter((id) => remaining.rows.some((r) => r.id === id)) }));
       },
       customer,
       band: s.bands[customer.customer_id] ?? defaultBandFor(customer.industry),
