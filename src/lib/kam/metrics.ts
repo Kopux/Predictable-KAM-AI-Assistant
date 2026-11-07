@@ -14,7 +14,7 @@ export const WEEKS_PER_MONTH = 52 / 12;
 /** Default healthy utilisation band (weekly washes ÷ allocated garments). */
 export const DEFAULT_BAND = { low: 30, high: 70 };
 /** Food & hygiene-critical accounts change garments more often, so the band sits higher. */
-export const HYGIENE_BAND = { low: 45, high: 85 };
+export const HYGIENE_BAND = { low: 40, high: 80 };
 export const HYGIENE_INDUSTRIES = ["Food & Beverage", "Healthcare"];
 
 export type Band = { low: number; high: number };
