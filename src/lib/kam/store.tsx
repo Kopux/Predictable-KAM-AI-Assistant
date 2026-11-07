@@ -1,6 +1,6 @@
 import { useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { sampleDataset, mergeDataset } from "./data";
-import { readLocalDataset, saveLocalDataset } from "./localDataset";
+import { readLocalDataset, saveLocalDataset, clearLocalDataset } from "./localDataset";
 import { defaultBandFor, findCustomer } from "./metrics";
 import { PRESETS } from "./period";
 import { KamContext, type KamState, type State, type Attendee, type Priority } from "./context";
@@ -73,6 +73,12 @@ export function KamProvider({ children }: { children: ReactNode }) {
         setData(merged);
         const first = incoming.customers[0];
         set((p) => ({ ...p, customerId: first?.customer_id ?? p.customerId, year: [...new Set(incoming.rows.map((r) => r.month.slice(0, 4)))].sort().at(-1) ?? "all" }));
+      },
+      hasImports: data !== sampleDataset,
+      clearImports: async () => {
+        await clearLocalDataset();
+        setData(sampleDataset);
+        set((p) => ({ ...p, customerId: findCustomer(p.customerId, sampleDataset).customer_id, year: "all", excluded: [] }));
       },
       customer,
       band: s.bands[customer.customer_id] ?? defaultBandFor(customer.industry),
