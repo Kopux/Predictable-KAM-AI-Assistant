@@ -1,8 +1,5 @@
 /** Time-period presets counted back from the latest month present in the account's data. */
 export const PRESETS = [
-  { id: "last3", label: "Last 3M", months: 3 },
-  { id: "last6", label: "Last 6M", months: 6 },
-  { id: "ytd", label: "YTD", months: 0 },
   { id: "last12", label: "Last 12M", months: 12 },
 ] as const;
 
@@ -20,14 +17,12 @@ export function periodRange(period: string, months: string[]): { from: string; t
   const c = /^custom:(\d{4}-\d{2}):(\d{4}-\d{2})$/.exec(period);
   if (c) return c[1]! <= c[2]! ? { from: c[1]!, to: c[2]! } : { from: c[2]!, to: c[1]! };
   if (/^\d{4}$/.test(period)) return { from: `${period}-01`, to: `${period}-12` };
-  if (period === "ytd") return { from: `${last.slice(0, 4)}-01`, to: last };
   const p = PRESETS.find((x) => x.id === period);
   return p ? { from: shift(last, p.months - 1), to: last } : null;
 }
 
 /** A preset is available only when the data covers its full length. */
 export function presetAvailable(id: string, months: string[]) {
-  if (id === "ytd") return months.length > 0;
   const p = PRESETS.find((x) => x.id === id);
   if (!p || months.length === 0) return false;
   const r = periodRange(id, months)!;
