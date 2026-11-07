@@ -17,6 +17,7 @@ import {
 } from "@/lib/kam/metrics";
 import { productById, siteById } from "@/lib/kam/data";
 import { BandBar, Kpi, Section } from "@/components/kam/bits";
+import { SteeringBriefing } from "@/components/kam/SteeringBriefing";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -80,6 +81,8 @@ function Pulse() {
           </Button>
         </div>
       )}
+
+      <SteeringBriefing t={t} band={band} sites={sites} outs={outs} />
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
         <Kpi icon={<Shirt className="h-4 w-4" />} label="Garments in circulation" value={fmt(t.inCirculation)} sub={`${fmt(t.wearers)} wearers (latest month)`} />
