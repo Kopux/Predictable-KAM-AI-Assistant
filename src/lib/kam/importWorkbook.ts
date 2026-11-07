@@ -73,13 +73,65 @@ export function parseWorkbook(buffer: ArrayBuffer, existing: Dataset): ImportPre
     });
   }
   const get = (name: string) => tables[name] ?? [];
-  const unique = (name: string, field: string) => {
+  const unique = (name: string, field: string, key = (r: RecordRow) => text(r[field])) => {
     const seen = new Set<string>();
-    get(name).forEach((r, i) => { const id = text(r[field]); if (seen.has(id)) errors.push(`${name}, row ${i + 2}: duplicate ${field} ${id}.`); seen.add(id); });
+    get(name).forEach((r, i) => { const id = key(r); if (seen.has(id)) errors.push(`${name}, row ${i + 2}: duplicate ${field} ${text(r[field])}.`); seen.add(id); });
   };
-  unique("Customers", "customer_id"); unique("Sites", "site_id"); unique("Products", "product_id");
-  const customers = get("Customers").map((r) => ({ customer_id: text(r["customer_id"]), customer_name: text(r["customer_name"]), industry: text(r["industry"]), segment: text(r["segment"]), hq_country: text(r["hq_country"]), priority_topics: text(r["priority_topics"]) }));
-  const sites = get("Sites").map((r) => ({ site_id: text(r["site_id"]), customer_id: text(r["customer_id"]), site_name: text(r["site_name"]), country: text(r["country"]), city: text(r["city"]), site_type: text(r["site_type"]), primary_laundry_id: text(r["primary_laundry_id"]) }));
+  const siteKey = (customer: string, site: string) => JSON.stringify([customer, site]);
+  unique("Customers", "customer_id"); unique("Sites", "site_id", (r) => siteKey(text(r["customer_id"]), text(r["site_id"]))); unique("Products", "product_id");
+
+  // Resolve identities before validating references or aggregating any sheet.
+  // Source IDs survive local persistence so later years and repeat imports reuse aliases.
+  const identityName = (v: unknown) => text(v).replace(/\s+/g, " ").toLowerCase();
+  const customerAliases = new Map<string, string>();
+  const customerIdsUsed = new Set([...existing.customers.map((c) => c.customer_id), ...get("Customers").map((r) => text(r["customer_id"]))]);
+  const reserve = (candidate: string, used: Set<string>) => {
+    let id = candidate;
+    let suffix = 2;
+    while (used.has(id)) id = `${candidate}::${suffix++}`;
+    used.add(id);
+    return id;
+  };
+  for (const r of get("Customers")) {
+    const source = text(r["customer_id"]);
+    const name = identityName(r["customer_name"]);
+    const match = existing.customers.find((c) =>
+      (c.customer_id === source || c.source_customer_id === source) && identityName(c.customer_name) === name);
+    const collision = existing.customers.some((c) => c.customer_id === source);
+    const resolved = match?.customer_id ?? (collision ? reserve(`${encodeURIComponent(source)}::${encodeURIComponent(name)}`, customerIdsUsed) : source);
+    customerAliases.set(source, resolved);
+    r["source_customer_id"] = source;
+    if (resolved !== source) warnings.push(`Company ${text(r["customer_name"])}: reused customer ID ${source} is linked as ${resolved}. Existing company data is kept.`);
+  }
+  const siteAliases = new Map<string, string>();
+  const siteIdsUsed = new Set([...existing.sites.map((s) => s.site_id), ...get("Sites").map((r) => text(r["site_id"]))]);
+  const siteOwners = new Map(existing.sites.map((s) => [s.site_id, s.customer_id]));
+  for (const r of get("Sites")) {
+    const sourceCustomer = text(r["customer_id"]);
+    const customer = customerAliases.get(sourceCustomer) ?? sourceCustomer;
+    const source = text(r["site_id"]);
+    const match = existing.sites.find((s) => s.customer_id === customer && (s.site_id === source || s.source_site_id === source));
+    const owner = siteOwners.get(source);
+    const resolved = match?.site_id ?? (owner !== undefined && owner !== customer
+      ? reserve(`${encodeURIComponent(customer)}::${encodeURIComponent(source)}`, siteIdsUsed) : source);
+    siteAliases.set(siteKey(sourceCustomer, source), resolved);
+    siteOwners.set(resolved, customer);
+    r["source_site_id"] = source;
+    if (resolved !== source) warnings.push(`Site ${text(r["site_name"])}: reused site ID ${source} is linked as ${resolved} for this company.`);
+  }
+  for (const records of Object.values(tables)) for (const r of records) {
+    const customer = text(r["customer_id"]);
+    const site = text(r["site_id"]);
+    if ("site_id" in r && "customer_id" in r) {
+      // Allow sheets to reference an already imported site even when Sites only lists new sites.
+      const resolvedCustomer = customerAliases.get(customer) ?? customer;
+      const existingSite = existing.sites.find((s) => s.customer_id === resolvedCustomer && (s.site_id === site || s.source_site_id === site));
+      r["site_id"] = siteAliases.get(siteKey(customer, site)) ?? existingSite?.site_id ?? site;
+    }
+    if ("customer_id" in r) r["customer_id"] = customerAliases.get(customer) ?? customer;
+  }
+  const customers = get("Customers").map((r) => ({ customer_id: text(r["customer_id"]), source_customer_id: text(r["source_customer_id"]), customer_name: text(r["customer_name"]), industry: text(r["industry"]), segment: text(r["segment"]), hq_country: text(r["hq_country"]), priority_topics: text(r["priority_topics"]) }));
+  const sites = get("Sites").map((r) => ({ site_id: text(r["site_id"]), source_site_id: text(r["source_site_id"]), customer_id: text(r["customer_id"]), site_name: text(r["site_name"]), country: text(r["country"]), city: text(r["city"]), site_type: text(r["site_type"]), primary_laundry_id: text(r["primary_laundry_id"]) }));
   const products = get("Products").map((r) => ({ product_id: text(r["product_id"]), product_name: text(r["product_name"]), product_group: text(r["product_group"]), avg_weight_kg: num(r["avg_weight_kg"]), synthetic_product_footprint_kgco2e: num(r["synthetic_product_footprint_kgco2e"]), synthetic_purchase_cost_eur: num(r["synthetic_purchase_cost_eur"]) }));
   const customerIds = new Set([...existing.customers, ...customers].map((r) => r["customer_id"]));
   const siteMap = new Map([...existing.sites, ...sites].map((r) => [r["site_id"], r]));
