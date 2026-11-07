@@ -32,3 +32,5 @@ use the editor.
 ## Project rules
 - Sample data lives in `src/data/pack.json`, pre-aggregated (month × site × product) from the reference `pack.xlsx`; all metrics are computed client-side in `src/lib/kam/metrics.ts` so excluding rows never mutates source data.
 - Meeting state (account, exclusions, band overrides, attendees, priorities) lives in `KamProvider` (localStorage) so it persists across the 3 steps and Advanced mode.
+- Workbook parsing uses a browser-only dynamic SheetJS import; datasets are retained in local IndexedDB and passed explicitly to metrics to isolate each browser's private data from SSR and other users.
+- Imported month/site/product keys are append-only with existing records winning; previews report skipped keys so re-imports cannot double count or overwrite source data.
