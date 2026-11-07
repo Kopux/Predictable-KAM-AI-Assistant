@@ -1,16 +1,16 @@
 import { Bar, BarChart, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, XAxis, YAxis, ReferenceArea } from "recharts";
-import type { Row } from "@/lib/kam/data";
+import { sampleDataset, type Dataset, type Row } from "@/lib/kam/data";
 import { monthlyTrend, siteStats, totals, type Band } from "@/lib/kam/metrics";
 import type { Slide } from "@/lib/kam/story";
 
 const axis = { fontSize: 10, stroke: "var(--slide-foreground)", strokeOpacity: 0.6 };
 
-export function SlideChart({ slide, rows, band }: { slide: Slide; rows: Row[]; band: Band }) {
+export function SlideChart({ slide, rows, band, data = sampleDataset }: { slide: Slide; rows: Row[]; band: Band; data?: Dataset }) {
   if (slide.chart === "trend") {
     const key = slide.id === "water" ? "waterSaved" : "utilisation";
     return (
       <ResponsiveContainer>
-        <LineChart data={monthlyTrend(rows)}>
+        <LineChart data={monthlyTrend(rows, data)}>
           <XAxis dataKey="label" {...axis} />
           <YAxis {...axis} width={34} />
           <Line type="monotone" dataKey={key} stroke="var(--accent)" strokeWidth={3} dot={false} />
@@ -19,7 +19,7 @@ export function SlideChart({ slide, rows, band }: { slide: Slide; rows: Row[]; b
     );
   }
   if (slide.chart === "sites") {
-    const s = siteStats(rows).sort((a, b) => a.utilisation - b.utilisation);
+    const s = siteStats(rows, data).sort((a, b) => a.utilisation - b.utilisation);
     return (
       <ResponsiveContainer>
         <BarChart data={s.map((x) => ({ n: x.city, u: +x.utilisation.toFixed(0) }))}>
@@ -38,7 +38,7 @@ export function SlideChart({ slide, rows, band }: { slide: Slide; rows: Row[]; b
   if (slide.chart === "impact") {
     return (
       <ResponsiveContainer>
-        <BarChart data={monthlyTrend(rows)}>
+        <BarChart data={monthlyTrend(rows, data)}>
           <XAxis dataKey="label" {...axis} />
           <YAxis {...axis} width={40} />
           <Bar dataKey="co2Saved" fill="var(--success)" radius={[3, 3, 0, 0]} />
@@ -47,7 +47,7 @@ export function SlideChart({ slide, rows, band }: { slide: Slide; rows: Row[]; b
     );
   }
   if (slide.chart === "circular") {
-    const t = totals(rows);
+    const t = totals(rows, data);
     const data = [
       { n: "Recycled / reused", v: t.recycledKg },
       { n: "Other recovery", v: t.textileWaste - t.recycledKg },
@@ -66,7 +66,7 @@ export function SlideChart({ slide, rows, band }: { slide: Slide; rows: Row[]; b
   return null;
 }
 
-export function SlideView({ slide, index, rows, band, customerName }: { slide: Slide; index: number; rows: Row[]; band: Band; customerName: string }) {
+export function SlideView({ slide, index, rows, band, customerName, data = sampleDataset }: { slide: Slide; index: number; rows: Row[]; band: Band; customerName: string; data?: Dataset }) {
   return (
     <div className="print-slide relative flex aspect-video w-full flex-col overflow-hidden rounded-2xl bg-slide p-[4%] text-slide-foreground shadow-lg">
       <div className="flex items-center justify-between text-[clamp(8px,1.1vw,13px)] uppercase tracking-widest opacity-70">
@@ -98,7 +98,7 @@ export function SlideView({ slide, index, rows, band, customerName }: { slide: S
         <div className="col-span-3 flex min-h-0 flex-col">
           {slide.chart ? (
             <div className="min-h-0 flex-1">
-              <SlideChart slide={slide} rows={rows} band={band} />
+              <SlideChart slide={slide} rows={rows} band={band} data={data} />
             </div>
           ) : null}
           {slide.big.length > 0 && (

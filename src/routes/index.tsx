@@ -10,8 +10,6 @@ import {
   exceptionRows,
   fmt,
   fmtK,
-  H1,
-  H2,
   outliers,
   pctChange,
   siteStats,
@@ -39,14 +37,17 @@ export const Route = createFileRoute("/")({
 });
 
 function Pulse() {
-  const { customer, band, setBand, excludedSet, toggleExcluded, clearExcluded } = useKam();
-  const rs = useMemo(() => customerRows(customer.customer_id, excludedSet), [customer, excludedSet]);
-  const all = useMemo(() => allCustomerRows(customer.customer_id), [customer]);
-  const t = totals(rs);
-  const h1 = totals(rs.filter((r) => H1.includes(r.month)));
-  const h2 = totals(rs.filter((r) => H2.includes(r.month)));
-  const sites = siteStats(rs).sort((a, b) => a.utilisation - b.utilisation);
-  const outs = outliers(rs, band);
+  const { customer, band, setBand, excludedSet, toggleExcluded, clearExcluded, data, year } = useKam();
+  const rs = useMemo(() => customerRows(customer.customer_id, excludedSet, data, year), [customer, excludedSet, data, year]);
+  const all = useMemo(() => allCustomerRows(customer.customer_id, data, year), [customer, data, year]);
+  const t = totals(rs, data);
+  const productById = Object.fromEntries(data.products.map((p) => [p.product_id, p]));
+  const siteById = Object.fromEntries(data.sites.map((p) => [p.site_id, p]));
+  const period = [...new Set(rs.map((r) => r.month.slice(0, 4)))].sort().join(", ");
+  const h1 = totals(rs.filter((r) => Number(r.month.slice(5)) <= 6), data);
+  const h2 = totals(rs.filter((r) => Number(r.month.slice(5)) > 6), data);
+  const sites = siteStats(rs, data).sort((a, b) => a.utilisation - b.utilisation);
+  const outs = outliers(rs, band, data);
   const exceptions = exceptionRows(all, band);
   const excludedHere = all.filter((r) => excludedSet.has(r.id)).length;
   const def = defaultBandFor(customer.industry);
@@ -61,7 +62,7 @@ function Pulse() {
           <p className="text-sm font-semibold uppercase tracking-wider text-accent">Step 1 · Account Pulse</p>
           <h1 className="text-4xl font-extrabold">{customer.customer_name}</h1>
           <p className="text-muted-foreground">
-            {customer.industry} · {customer.segment} · {sites.length} sites · 2025 · changes shown are Jul–Dec vs Jan–Jun
+            {customer.industry} · {customer.segment} · {sites.length} sites · {period} · changes shown are Jul–Dec vs Jan–Jun
           </p>
         </div>
         <Button asChild size="lg">
@@ -81,7 +82,7 @@ function Pulse() {
       )}
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
-        <Kpi icon={<Shirt className="h-4 w-4" />} label="Garments in circulation" value={fmt(t.inCirculation)} sub={`${fmt(t.wearers)} wearers (Dec)`} />
+        <Kpi icon={<Shirt className="h-4 w-4" />} label="Garments in circulation" value={fmt(t.inCirculation)} sub={`${fmt(t.wearers)} wearers (latest month)`} />
         <Kpi icon={<WashingMachine className="h-4 w-4" />} label="Washing frequency" value={`${t.washesPerWearerWeek.toFixed(1)}×`} sub="per wearer / week" delta={pctChange(h2.washesPerWearerWeek, h1.washesPerWearerWeek)} />
         <Kpi icon={<Wrench className="h-4 w-4" />} label="Repair rate" value={t.repairRate.toFixed(2)} sub="per 100 washes" delta={pctChange(h2.repairRate, h1.repairRate)} goodWhenUp={false} />
         <Kpi icon={<Euro className="h-4 w-4" />} label="Cost avoided" value={`€${fmtK(t.costAvoided)}`} sub="new garments not bought (est.)" delta={pctChange(h2.costAvoided, h1.costAvoided)} />
