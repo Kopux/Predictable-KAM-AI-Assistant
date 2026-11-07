@@ -40,14 +40,14 @@ export function ContextBar() {
 
   return (
     <div className="border-t bg-card/60">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-3 px-4 py-3">
-        <div className="flex min-w-0 flex-wrap items-center gap-3">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2 sm:gap-y-3 sm:py-3">
+        <div className="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:w-auto sm:flex-wrap">
           <Building2 className="hidden h-6 w-6 text-primary sm:block" />
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Customer account</p>
+            <p className="hidden text-xs font-semibold uppercase tracking-wider text-muted-foreground sm:block">Customer account</p>
             <Popover open={pickOpen} onOpenChange={setPickOpen}>
               <PopoverTrigger asChild>
-                <button aria-label="Customer account" className="flex w-[min(300px,80vw)] items-center gap-2 text-left font-display text-xl font-bold">
+                <button aria-label="Customer account" className="flex w-full max-w-[300px] items-center gap-2 text-left font-display text-lg font-bold sm:text-xl">
                   <span className="truncate">{customer.customer_name}</span>
                   <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
                 </button>
@@ -76,15 +76,16 @@ export function ContextBar() {
                 </Command>
               </PopoverContent>
             </Popover>
-            <p className="text-xs text-muted-foreground">
+            <p className="truncate text-xs text-muted-foreground">
               {customer.industry} · {info.sites} sites · {info.wearers.toLocaleString()} wearers
             </p>
           </div>
           <ExcelImport />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <CalendarRange className="h-5 w-5 text-primary" />
+        <div className="flex w-full flex-wrap items-center justify-between gap-2 sm:w-auto sm:justify-start">
+          <div className="flex items-center gap-2">
+          <CalendarRange className="hidden h-5 w-5 text-primary sm:block" />
           <div role="radiogroup" aria-label="Period" className="flex flex-wrap rounded-full border bg-card p-1">
             {PRESETS.map((p) => {
               const ok = presetAvailable(p.id, info.months);
@@ -126,9 +127,11 @@ export function ContextBar() {
             </Popover>
             <button role="radio" aria-checked={year === "all"} onClick={() => setYear("all")} className={chip(year === "all")}>All</button>
           </div>
+          </div>
+          <div className="sm:hidden">{data.customers.length > 0 && <AskDataButton />}</div>
         </div>
 
-        <div className="lg:ml-auto">
+        <div className="hidden sm:block lg:ml-auto">
           {data.customers.length > 0 && <AskDataButton />}
         </div>
       </div>
