@@ -20,6 +20,16 @@ export async function readLocalDataset(): Promise<Dataset | undefined> {
   });
 }
 
+export async function clearLocalDataset(): Promise<void> {
+  const db = await open();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction("datasets", "readwrite");
+    transaction.objectStore("datasets").delete("imports");
+    transaction.oncomplete = () => { db.close(); resolve(); };
+    transaction.onerror = () => { db.close(); reject(transaction.error); };
+  });
+}
+
 export async function saveLocalDataset(data: Dataset): Promise<void> {
   const db = await open();
   return new Promise((resolve, reject) => {

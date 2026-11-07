@@ -20,6 +20,8 @@ export type KamState = State & {
   years: string[];
   setYear: (year: string) => void;
   importData: (data: Dataset) => Promise<void>;
+  clearImports: () => Promise<void>;
+  hasImports: boolean;
   dataReady: boolean;
   customer: ReturnType<typeof findCustomer>;
   band: Band;
