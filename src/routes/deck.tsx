@@ -87,7 +87,7 @@ function Deck() {
               setBusy(true);
               try {
                 const msgs = getChatSession().messages;
-                await exportPptx(customer.customer_name, deck.summary, visible, attendees, msgs.length ? sessionTranscript(msgs, customer.customer_name) : undefined);
+                await exportPptx(customer.customer_name, deck.summary, visible, attendees, msgs.length ? sessionTranscript(msgs, customer.customer_name) : undefined, isSample);
                 toast.success("PowerPoint downloaded");
               } catch {
                 toast.error("Could not create the PowerPoint");
@@ -97,6 +97,32 @@ function Deck() {
             }}
           >
             <Download className="mr-1 h-4 w-4" /> {busy ? "Preparing…" : "PowerPoint"}
+          </Button>
+          <Button
+            variant="outline"
+            disabled={busy}
+            onClick={async () => {
+              setBusy(true);
+              try {
+                await exportCopilotWorkbook(customer.customer_name, customer.industry, rows, band, data);
+                toast.success("Copilot Excel downloaded");
+              } catch {
+                toast.error("Could not create the Copilot Excel");
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            <FileSpreadsheet className="mr-1 h-4 w-4" /> Copilot Excel
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              navigator.clipboard.writeText(copilotPrompt(customer.customer_name, customer.industry, band));
+              toast.success("Copilot prompt copied");
+            }}
+          >
+            <ClipboardCopy className="mr-1 h-4 w-4" /> Copy Copilot prompt
           </Button>
         </div>
       </div>
@@ -135,7 +161,7 @@ function Deck() {
         <div>
           {slide ? (
             <>
-              <SlideView slide={slide} index={idx} rows={rows} data={data} band={band} customerName={customer.customer_name} />
+              <SlideView slide={slide} index={idx} rows={rows} data={data} band={band} customerName={customer.customer_name} isSample={isSample} />
               <div className="mt-3 flex items-center justify-center gap-4">
                 <Button variant="outline" size="icon" onClick={() => setCur(Math.max(0, idx - 1))} disabled={idx === 0} aria-label="Previous slide">
                   <ChevronLeft className="h-4 w-4" />
@@ -183,7 +209,7 @@ function Deck() {
 
       <div className="hidden space-y-4 print:block">
         {visible.map((s, i) => (
-          <SlideView key={s.id} slide={s} index={i} rows={rows} data={data} band={band} customerName={customer.customer_name} />
+          <SlideView key={s.id} slide={s} index={i} rows={rows} data={data} band={band} customerName={customer.customer_name} isSample={isSample} />
         ))}
       </div>
     </div>
