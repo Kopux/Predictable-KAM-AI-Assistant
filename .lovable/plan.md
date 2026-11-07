@@ -1,29 +1,27 @@
-# Hackathon rebrand + clearer layout, while keeping today's version safe
+# Clearer layout first, save that version, then the hackathon brand
 
-## 1. Keep the current version (do this first, before any change)
-- Connect GitHub (Connectors → GitHub → Connect project). Lovable pushes the current app to a new repo, giving you this exact version as a starting point.
-- In GitHub, create a tag or branch named `v1-generic` from that first commit. It stays frozen for later use, whatever we change next.
-- Optional: make the rebrand in a Lovable **draft** so the main project stays generic until you accept it. For a hackathon, building straight on main is simpler because the tag already saves the old version.
-
-## 2. Rebrand for the challenge owner (Lindström, please confirm the spelling)
-- Name: "KAM Meeting." becomes "Lindström KAM Assistant". Page titles and descriptions are updated to match.
-- Colours: Lindström-style deep blue as the main colour, a bright cyan/light blue accent, white/light-grey background, and a matching dark mode. Replaces the current teal + orange.
-- Font: a clean, Scandinavian-style sans font (for example Inter Tight or Manrope) in place of Bricolage/Figtree.
-- Logo: a simple wordmark in the header. No official logo files are used unless you supply them.
-- Sample company names stay as they are unless you want them renamed.
-
-## 3. Layout improvements from the critique
+## Phase 1: Layout improvements (keeps the current look and name)
 - Top bar: logo, the 3 steps, and the Default/Advanced switch.
 - New **Context Bar** under it, shown on every page:
   - Large company picker with chips (industry · sites · wearers).
   - "+ Import Excel" button beside the company picker.
   - Period presets: Last 3M · Last 6M · YTD · Last 12M · a specific year · All. Presets with no data are greyed out, and periods are counted back from the latest month in the data.
-  - A highlighted "Ask AI about this account" button in the accent colour.
-- The small phone screen works: the bar wraps into two rows.
+  - A highlighted "Ask AI about this account" button.
+- The small phone screen works: the bar wraps into rows.
+
+## Phase 2: Save this version (you do this in GitHub)
+- GitHub is already connected, so Phase 1 syncs automatically.
+- In GitHub, create a tag or branch called `v2-generic` from the latest commit. It keeps the improved, unbranded version for your repo.
+
+## Phase 3: Company-presentable version (Lindström, please confirm the spelling)
+- Name: "Lindström KAM Assistant" in the header and page titles.
+- Colours: Lindström-style deep blue as the main colour, a bright light-blue accent, a clean white/light-grey background, and a matching dark mode.
+- Font: a clean Scandinavian-style sans font (for example Manrope).
+- Simple wordmark logo. No official logo files are used unless you provide them.
 
 ## Technical details
-- Tokens are changed only in `src/styles.css` and the font link in `__root.tsx`.
-- `year` state is generalised to `period` (preset id or year). The metrics filter becomes a month range, and the H1/H2 delta becomes first half vs second half of the selected range.
+- `year` state is generalised to `period` (preset id or year). The metrics filter becomes a month range, and deltas compare the first half vs the second half of the range.
 - A new `ContextBar` component takes over the selectors from `AppShell`.
-- Tests are added for the period presets: Last 3M = the latest 3 months in the data, YTD = Jan through the latest month of the latest year, unavailable presets disabled.
-- Memory is updated with the brand colours/name. `AGENTS.md` is updated with the period rule.
+- Tests are added for the presets: Last 3M = the latest 3 months in the data, YTD = Jan through the latest month of the latest year, unavailable presets disabled.
+- Branding changes only design tokens in `src/styles.css`, the font link in `__root.tsx`, the names and heads, so a rollback means one revert.
+- Memory gets the brand, and `AGENTS.md` gets the period rule. `roadmap.md` tracks the 3 phases.
