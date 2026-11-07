@@ -49,7 +49,7 @@ function Advanced() {
   const siteById = Object.fromEntries(data.sites.map((s) => [s.site_id, s]));
   const siteIds = new Set(rs.map((r) => r.site));
   const rtype = Object.entries(
-    repairTypes.filter(([s]) => siteIds.has(s) && siteById[s]?.customer_id === customer.customer_id).reduce<Record<string, number>>((m, [, t, n]) => ((m[t] = (m[t] ?? 0) + n), m), {}),
+    rs.some((r) => r.repairBreakdown) ? rs.reduce<Record<string, number>>((m, r) => { for (const [type, count] of Object.entries(r.repairBreakdown ?? {})) m[type] = (m[type] ?? 0) + count; return m; }, {}) : repairTypes.filter(([s]) => siteIds.has(s) && siteById[s]?.customer_id === customer.customer_id).reduce<Record<string, number>>((m, [, t, n]) => ((m[t] = (m[t] ?? 0) + n), m), {}),
   )
     .map(([t, n]) => ({ t, n }))
     .sort((a, b) => b.n - a.n);

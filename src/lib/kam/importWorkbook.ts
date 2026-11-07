@@ -86,7 +86,7 @@ export function parseWorkbook(buffer: ArrayBuffer, existing: Dataset): ImportPre
   const productIds = new Set([...existing.products, ...products].map((r) => r["product_id"]));
   sites.forEach((s) => { if (!customerIds.has(s.customer_id)) errors.push(`Sites: ${s.site_id} references unknown customer ${s.customer_id}.`); const old = existing.sites.find((v) => v.site_id === s.site_id); if (old && old.customer_id !== s.customer_id) errors.push(`Site ID ${s.site_id} already belongs to another company. Use unique IDs for new companies.`); });
   customers.forEach((c) => { const old = existing.customers.find((v) => v.customer_id === c.customer_id); if (old && old.customer_name !== c.customer_name) errors.push(`Customer ID ${c.customer_id} already belongs to ${old.customer_name}. Use a unique ID for ${c.customer_name}.`); });
-  products.forEach((p) => { const old = existing.products.find((v) => v.product_id === p.product_id); if (old && JSON.stringify(old) !== JSON.stringify(p)) warnings.push(`Product ${p.product_id} already exists; existing product details and cost will be kept.`); });
+  products.forEach((p) => { const old = existing.products.find((v) => v.product_id === p.product_id); if (old && Object.keys(p).some((k) => old[k as keyof typeof old] !== p[k as keyof typeof p])) warnings.push(`Product ${p.product_id} already exists; existing product details and cost will be kept.`); });
   for (const name of ["Service_Activity", "Customer_Impacts", "Repairs", "Service_Cycles"]) get(name).forEach((r, i) => {
     const site = siteMap.get(text(r["site_id"]));
     if (!site || site.customer_id !== text(r["customer_id"])) errors.push(`${name}, row ${i + 2}: site/customer reference does not match.`);
@@ -112,6 +112,7 @@ export function parseWorkbook(buffer: ArrayBuffer, existing: Dataset): ImportPre
   });
   apply("Customer_Impacts", { allocated_water_l: "water", allocated_energy_kwh: "energy", allocated_process_kgco2e: "co2", allocated_delivery_kgco2e: "deliveryCo2", allocated_textile_waste_kg: "textileWaste", water_saving_vs_local_l: "waterSaved", energy_saving_vs_local_kwh: "energySaved", emissions_saving_vs_local_kgco2e: "co2Saved" });
   apply("Repairs", { repair_count: "repairs", estimated_replacements_postponed: "postponed", estimated_avoided_product_kgco2e: "avoidedCo2" });
+  get("Repairs").forEach((r) => { const row = map.get(rowKey(empty(r))); if (!row) return; const type = text(r["repair_type"]); row.repairBreakdown ??= {}; row.repairBreakdown[type] = (row.repairBreakdown[type] ?? 0) + num(r["repair_count"]); });
   for (const key of activityKeys) if (!impactKeys.has(key)) errors.push(`Customer_Impacts: missing impact data for ${key}.`);
   get("Service_Cycles").forEach((r, i) => { const row = map.get(rowKey(empty(r))); if (!row) { errors.push(`Service_Cycles, row ${i + 2}: no matching activity month/site/product.`); return; } row.cycles++; row.cycleHours += num(r["cycle_hours"]); if (text(r["performance_flag"]) === "ON_TIME") row.onTime++; });
   if (!workbook.Sheets["Service_Cycles"]) warnings.push("No Service_Cycles worksheet: on-time service and turnaround slides will be omitted.");

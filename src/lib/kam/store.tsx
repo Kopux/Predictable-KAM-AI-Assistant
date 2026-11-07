@@ -20,6 +20,7 @@ export const PRIORITIES: { id: Priority; label: string }[] = [
 ];
 
 type State = {
+  year: string;
   customerId: string;
   excluded: number[];
   bands: Record<string, Band>;
@@ -49,6 +50,7 @@ type Ctx = State & {
 
 const KEY = "kam-assistant-v1";
 const initial: State = {
+  year: "all",
   customerId: findCustomer("", sampleDataset).customer_id,
   excluded: [],
   bands: {},
@@ -64,7 +66,6 @@ export function KamProvider({ children }: { children: ReactNode }) {
   const [loaded, setLoaded] = useState(false);
   const [data, setData] = useState(sampleDataset);
   const [dataReady, setDataReady] = useState(false);
-  const [selectedYear, setYear] = useState("all");
 
   useEffect(() => {
     readLocalDataset().then((saved) => { if (saved) setData(mergeDataset(sampleDataset, saved)); }).catch(() => {}).finally(() => setDataReady(true));
@@ -93,15 +94,14 @@ export function KamProvider({ children }: { children: ReactNode }) {
       data,
       dataReady,
       years,
-      year: years.includes(selectedYear) ? selectedYear : "all",
-      setYear,
+      year: years.includes(s.year) ? s.year : "all",
+      setYear: (year) => set((p) => ({ ...p, year })),
       importData: async (incoming) => {
         const merged = mergeDataset(data, incoming);
         await saveLocalDataset(merged);
         setData(merged);
         const first = incoming.customers[0];
-        if (first) set((p) => ({ ...p, customerId: first.customer_id }));
-        setYear([...new Set(incoming.rows.map((r) => r.month.slice(0, 4)))].sort().at(-1) ?? "all");
+        set((p) => ({ ...p, customerId: first?.customer_id ?? p.customerId, year: [...new Set(incoming.rows.map((r) => r.month.slice(0, 4)))].sort().at(-1) ?? "all" }));
       },
       customer,
       band: s.bands[customer.customer_id] ?? defaultBandFor(customer.industry),
@@ -125,7 +125,7 @@ export function KamProvider({ children }: { children: ReactNode }) {
       togglePriority: (x) => set((p) => ({ ...p, priorities: toggle(p.priorities, x) })),
       toggleSlide: (id) => set((p) => ({ ...p, hiddenSlides: toggle(p.hiddenSlides, id) })),
     };
-  }, [s, data, selectedYear, dataReady]);
+  }, [s, data, dataReady]);
 
   return <C.Provider value={value}>{children}</C.Provider>;
 }

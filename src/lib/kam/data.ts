@@ -53,6 +53,7 @@ export type Row = {
   cycleHours: number;
   onTime: number;
   recycledKg?: number | undefined;
+  repairBreakdown?: Record<string, number>;
 };
 
 const cols = pack.cols as string[];
