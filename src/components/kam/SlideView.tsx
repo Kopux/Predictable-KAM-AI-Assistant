@@ -66,9 +66,12 @@ export function SlideChart({ slide, rows, band, data = sampleDataset }: { slide:
   return null;
 }
 
-export function SlideView({ slide, index, rows, band, customerName, data = sampleDataset }: { slide: Slide; index: number; rows: Row[]; band: Band; customerName: string; data?: Dataset }) {
+export function SlideView({ slide, index, rows, band, customerName, data = sampleDataset, isSample = false }: { slide: Slide; index: number; rows: Row[]; band: Band; customerName: string; data?: Dataset; isSample?: boolean }) {
   return (
     <div className="print-slide relative flex aspect-video w-full flex-col overflow-hidden rounded-2xl bg-slide p-[4%] text-slide-foreground shadow-lg">
+      <div className="text-[clamp(7px,0.9vw,11px)] font-bold uppercase tracking-widest text-accent">
+        {isSample ? "Synthetic demo data · Not audited" : "Draft · KAM must review before customer use"}
+      </div>
       <div className="flex items-center justify-between text-[clamp(8px,1.1vw,13px)] uppercase tracking-widest opacity-70">
         <span className="text-accent">{slide.kicker}</span>
         <span>
