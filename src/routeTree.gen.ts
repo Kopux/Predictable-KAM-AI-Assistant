@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdvancedRouteImport } from './routes/advanced'
 import { Route as DeckRouteImport } from './routes/deck'
 import { Route as MeetingRouteImport } from './routes/meeting'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,18 +35,25 @@ const MeetingRoute = MeetingRouteImport.update({
   path: '/meeting',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/advanced': typeof AdvancedRoute
   '/deck': typeof DeckRoute
   '/meeting': typeof MeetingRoute
+  '/api/chat': typeof ApiChatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/advanced': typeof AdvancedRoute
   '/deck': typeof DeckRoute
   '/meeting': typeof MeetingRoute
+  '/api/chat': typeof ApiChatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,14 @@ export interface FileRoutesById {
   '/advanced': typeof AdvancedRoute
   '/deck': typeof DeckRoute
   '/meeting': typeof MeetingRoute
+  '/api/chat': typeof ApiChatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/advanced' | '/deck' | '/meeting'
+  fullPaths: '/' | '/advanced' | '/deck' | '/meeting' | '/api/chat'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/advanced' | '/deck' | '/meeting'
-  id: '__root__' | '/' | '/advanced' | '/deck' | '/meeting'
+  to: '/' | '/advanced' | '/deck' | '/meeting' | '/api/chat'
+  id: '__root__' | '/' | '/advanced' | '/deck' | '/meeting' | '/api/chat'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +76,7 @@ export interface RootRouteChildren {
   AdvancedRoute: typeof AdvancedRoute
   DeckRoute: typeof DeckRoute
   MeetingRoute: typeof MeetingRoute
+  ApiChatRoute: typeof ApiChatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +109,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MeetingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +124,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdvancedRoute: AdvancedRoute,
   DeckRoute: DeckRoute,
   MeetingRoute: MeetingRoute,
+  ApiChatRoute: ApiChatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
