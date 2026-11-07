@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 import { Activity, BarChart3, Presentation, Users, Shirt } from "lucide-react";
 import { ContextBar } from "./ContextBar";
 import { cn } from "@/lib/utils";
+import { useKam } from "@/lib/kam/store";
+import { FileSpreadsheet } from "lucide-react";
 
 const STEPS = [
   { to: "/" as const, n: 1, label: "Account Pulse", icon: Activity },
@@ -14,6 +16,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const advanced = pathname.startsWith("/advanced");
+  const { data, dataReady } = useKam();
 
   return (
     <div className="min-h-screen">
@@ -79,7 +82,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         )}
         <ContextBar />
       </header>
-      <main className="mx-auto max-w-7xl px-4 py-6">{children}</main>
+      <main className="mx-auto max-w-7xl px-4 py-6">{dataReady && data.customers.length === 0 ? <div className="py-12 text-center"><FileSpreadsheet className="mx-auto mb-4 h-10 w-10 text-primary" /><h1 className="font-display text-2xl font-bold">No company data</h1><p className="mt-2 text-muted-foreground">Import an Excel workbook to start a meeting.</p></div> : children}</main>
     </div>
   );
 }

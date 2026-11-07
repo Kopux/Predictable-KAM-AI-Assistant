@@ -1,4 +1,6 @@
 # Excel import
+- [x] Add searchable company/year removal choices including demo data and persist deletion.
+- [x] Verify selective removal, remove-all, reload and re-import flows.
 - [x] Validate and aggregate reference-schema workbooks entirely in the browser.
 - [x] Preview sheets, counts, errors, anomalies and merge conflicts before importing.
 - [x] Merge local datasets and select accounts/years across every meeting step.

@@ -278,8 +278,7 @@ export function monthlyTrend(rs: Row[], data: Dataset = sampleDataset) {
 
 export function findCustomer(id: string, data: Dataset = sampleDataset) {
   const customer = data.customers.find((c) => c.customer_id === id) ?? data.customers[0];
-  if (!customer) throw new Error("No customer accounts available");
-  return customer;
+  return customer ?? { customer_id: "", customer_name: "No company data", industry: "", segment: "", hq_country: "", priority_topics: "" };
 }
 
 export const fmt = (n: number, d = 0) =>

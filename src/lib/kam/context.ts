@@ -21,6 +21,7 @@ export type KamState = State & {
   setYear: (year: string) => void;
   importData: (data: Dataset) => Promise<void>;
   clearImports: () => Promise<void>;
+  removeDatasets: (keys: string[]) => Promise<void>;
   hasImports: boolean;
   dataReady: boolean;
   customer: ReturnType<typeof findCustomer>;
