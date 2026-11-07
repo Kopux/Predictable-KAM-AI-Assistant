@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DeckRouteImport } from './routes/deck'
 import { Route as MeetingRouteImport } from './routes/meeting'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeckRoute = DeckRouteImport.update({
+  id: '/deck',
+  path: '/deck',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MeetingRoute = MeetingRouteImport.update({
@@ -25,27 +31,31 @@ const MeetingRoute = MeetingRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/deck': typeof DeckRoute
   '/meeting': typeof MeetingRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/deck': typeof DeckRoute
   '/meeting': typeof MeetingRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/deck': typeof DeckRoute
   '/meeting': typeof MeetingRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/meeting'
+  fullPaths: '/' | '/deck' | '/meeting'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/meeting'
-  id: '__root__' | '/' | '/meeting'
+  to: '/' | '/deck' | '/meeting'
+  id: '__root__' | '/' | '/deck' | '/meeting'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DeckRoute: typeof DeckRoute
   MeetingRoute: typeof MeetingRoute
 }
 
@@ -56,6 +66,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/deck': {
+      id: '/deck'
+      path: '/deck'
+      fullPath: '/deck'
+      preLoaderRoute: typeof DeckRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/meeting': {
@@ -70,6 +87,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DeckRoute: DeckRoute,
   MeetingRoute: MeetingRoute,
 }
 export const routeTree = rootRouteImport
