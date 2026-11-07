@@ -1,10 +1,10 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { customers, sampleDataset, mergeDataset, type Dataset } from "./data";
+import { useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { sampleDataset, mergeDataset } from "./data";
 import { readLocalDataset, saveLocalDataset } from "./localDataset";
-import { defaultBandFor, findCustomer, type Band } from "./metrics";
+import { defaultBandFor, findCustomer } from "./metrics";
+import { KamContext, type KamState, type State, type Attendee, type Priority } from "./context";
 
-export type Attendee = "procurement" | "sustainability" | "operations";
-export type Priority = "cost" | "co2" | "water" | "recycling" | "hygiene";
+export type { Attendee, Priority } from "./context";
 
 export const ATTENDEES: { id: Attendee; label: string; hint: string }[] = [
   { id: "procurement", label: "Procurement / Finance", hint: "Cost, contract value, garment stock" },
@@ -19,35 +19,6 @@ export const PRIORITIES: { id: Priority; label: string }[] = [
   { id: "hygiene", label: "Hygiene standards" },
 ];
 
-type State = {
-  year: string;
-  customerId: string;
-  excluded: number[];
-  bands: Record<string, Band>;
-  attendees: Attendee[];
-  priorities: Priority[];
-  hiddenSlides: string[];
-};
-
-type Ctx = State & {
-  data: Dataset;
-  year: string;
-  years: string[];
-  setYear: (year: string) => void;
-  importData: (data: Dataset) => Promise<void>;
-  dataReady: boolean;
-  customer: ReturnType<typeof findCustomer>;
-  band: Band;
-  excludedSet: Set<number>;
-  setCustomer: (id: string) => void;
-  toggleExcluded: (ids: number[], exclude: boolean) => void;
-  clearExcluded: () => void;
-  setBand: (b: Band | null) => void;
-  toggleAttendee: (a: Attendee) => void;
-  togglePriority: (p: Priority) => void;
-  toggleSlide: (id: string) => void;
-};
-
 const KEY = "kam-assistant-v1";
 const initial: State = {
   year: "all",
@@ -58,8 +29,6 @@ const initial: State = {
   priorities: ["cost", "co2"],
   hiddenSlides: [],
 };
-
-const C = createContext<Ctx | null>(null);
 
 export function KamProvider({ children }: { children: ReactNode }) {
   const [s, set] = useState<State>(initial);
@@ -84,7 +53,7 @@ export function KamProvider({ children }: { children: ReactNode }) {
     if (loaded) localStorage.setItem(KEY, JSON.stringify(s));
   }, [s, loaded]);
 
-  const value = useMemo<Ctx>(() => {
+  const value = useMemo<KamState>(() => {
     const customer = findCustomer(s.customerId, data);
     const siteIds = new Set(data.sites.filter((v) => v.customer_id === customer.customer_id).map((v) => v.site_id));
     const years = [...new Set(data.rows.filter((v) => siteIds.has(v.site)).map((v) => v.month.slice(0, 4)))].sort();
@@ -127,11 +96,11 @@ export function KamProvider({ children }: { children: ReactNode }) {
     };
   }, [s, data, dataReady]);
 
-  return <C.Provider value={value}>{children}</C.Provider>;
+  return <KamContext.Provider value={value}>{children}</KamContext.Provider>;
 }
 
 export function useKam() {
-  const v = useContext(C);
+  const v = useContext(KamContext);
   if (!v) throw new Error("useKam outside KamProvider");
   return v;
 }
