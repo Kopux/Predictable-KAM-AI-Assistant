@@ -25,7 +25,7 @@ function useStarters() {
 
 export function AskDataChat({ className = "" }: { className?: string }) {
   const kam = useKam();
-  const { messages, sendMessage, status, stop, setMessages, error } = useChat({ chat: getChatSession() });
+  const { messages, sendMessage, status, setMessages, error } = useChat({ chat: getChatSession() });
   const [text, setText] = useState("");
   const starters = useStarters();
 
@@ -88,7 +88,7 @@ export function AskDataChat({ className = "" }: { className?: string }) {
               <Trash2 className="mr-1 h-4 w-4" /> Clear
             </Button>
           </PromptInputTools>
-          <PromptInputSubmit status={status} onStop={stop} disabled={!text.trim() && status === "ready"} />
+          <PromptInputSubmit status={status} disabled={!text.trim() && status === "ready"} />
         </PromptInputFooter>
       </PromptInput>
     </div>
