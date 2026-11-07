@@ -5,7 +5,7 @@ import type { Slide } from "@/lib/kam/story";
 
 const axis = { fontSize: 10, stroke: "var(--slide-foreground)", strokeOpacity: 0.6 };
 
-export function SlideChart({ slide, rows, band, data = sampleDataset }: { slide: Slide; rows: Row[]; band: Band; data?: Dataset }) {
+export function SlideChart({ slide, rows, band, data = sampleDataset, staticChart = false }: { slide: Slide; rows: Row[]; band: Band; data?: Dataset; staticChart?: boolean }) {
   if (slide.chart === "trend") {
     const key = slide.id === "water" ? "waterSaved" : "utilisation";
     return (
@@ -13,7 +13,7 @@ export function SlideChart({ slide, rows, band, data = sampleDataset }: { slide:
         <LineChart data={monthlyTrend(rows, data)}>
           <XAxis dataKey="label" {...axis} />
           <YAxis {...axis} width={34} />
-          <Line type="monotone" dataKey={key} stroke="var(--accent)" strokeWidth={3} dot={false} />
+          <Line type="monotone" dataKey={key} stroke="var(--accent)" strokeWidth={3} dot={false} isAnimationActive={!staticChart} />
         </LineChart>
       </ResponsiveContainer>
     );
@@ -26,7 +26,7 @@ export function SlideChart({ slide, rows, band, data = sampleDataset }: { slide:
           <ReferenceArea y1={band.low} y2={band.high} fill="var(--success)" fillOpacity={0.25} />
           <XAxis dataKey="n" {...axis} hide />
           <YAxis {...axis} width={30} />
-          <Bar dataKey="u" radius={[3, 3, 0, 0]}>
+          <Bar dataKey="u" radius={[3, 3, 0, 0]} isAnimationActive={!staticChart}>
             {s.map((x) => (
               <Cell key={x.siteId} fill={x.utilisation < band.low || x.utilisation > band.high ? "var(--accent)" : "var(--slide-foreground)"} />
             ))}
@@ -41,7 +41,7 @@ export function SlideChart({ slide, rows, band, data = sampleDataset }: { slide:
         <BarChart data={monthlyTrend(rows, data)}>
           <XAxis dataKey="label" {...axis} />
           <YAxis {...axis} width={40} />
-          <Bar dataKey="co2Saved" fill="var(--success)" radius={[3, 3, 0, 0]} />
+          <Bar dataKey="co2Saved" fill="var(--success)" radius={[3, 3, 0, 0]} isAnimationActive={!staticChart} />
         </BarChart>
       </ResponsiveContainer>
     );
@@ -55,7 +55,7 @@ export function SlideChart({ slide, rows, band, data = sampleDataset }: { slide:
     return (
       <ResponsiveContainer>
         <PieChart>
-          <Pie data={pieData} dataKey="v" innerRadius="55%" outerRadius="85%" stroke="none">
+          <Pie data={pieData} dataKey="v" innerRadius="55%" outerRadius="85%" stroke="none" isAnimationActive={!staticChart}>
             <Cell fill="var(--success)" />
             <Cell fill="var(--slide-foreground)" fillOpacity={0.3} />
           </Pie>
@@ -66,7 +66,7 @@ export function SlideChart({ slide, rows, band, data = sampleDataset }: { slide:
   return null;
 }
 
-export function SlideView({ slide, index, rows, band, customerName, data = sampleDataset, isSample = false }: { slide: Slide; index: number; rows: Row[]; band: Band; customerName: string; data?: Dataset; isSample?: boolean }) {
+export function SlideView({ slide, index, rows, band, customerName, data = sampleDataset, isSample = false, staticChart = false }: { slide: Slide; index: number; rows: Row[]; band: Band; customerName: string; data?: Dataset; isSample?: boolean; staticChart?: boolean }) {
   return (
     <div className="print-slide relative flex aspect-video w-full flex-col overflow-hidden rounded-2xl bg-slide p-[4%] text-slide-foreground shadow-lg">
       <div className="text-[clamp(7px,0.9vw,11px)] font-bold uppercase tracking-widest text-accent">
@@ -100,8 +100,8 @@ export function SlideView({ slide, index, rows, band, customerName, data = sampl
         </div>
         <div className="col-span-3 flex min-h-0 flex-col">
           {slide.chart ? (
-            <div className="min-h-0 flex-1">
-              <SlideChart slide={slide} rows={rows} band={band} data={data} />
+            <div className="min-h-0 flex-1" data-chart-slide={staticChart ? slide.id : undefined}>
+              <SlideChart slide={slide} rows={rows} band={band} data={data} staticChart={staticChart} />
             </div>
           ) : null}
           {slide.big.length > 0 && (
