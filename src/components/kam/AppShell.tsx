@@ -34,7 +34,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="ml-auto flex flex-wrap items-center gap-3">
             <Select value={customer.customer_id} onValueChange={setCustomer}>
               <SelectTrigger className="w-[240px] bg-card" aria-label="Customer account">
-                <SelectValue />
+                <SelectValue>{customer.customer_name}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {customers.map((c) => (

@@ -85,10 +85,7 @@ export function totals(rs: Row[]): Totals {
     costAvoided: 0,
   };
   for (const r of rs) {
-    if (r.month === last) {
-      t.wearers += r.wearers;
-      t.inCirculation += r.allocated;
-    }
+    if (r.month === last) t.inCirculation += r.allocated;
     t.washed += r.washed;
     t.allocatedMonths += r.allocated;
     t.kg += r.kg;
@@ -108,7 +105,14 @@ export function totals(rs: Row[]): Totals {
     t.cycleHours += r.cycleHours;
     t.costAvoided += r.postponed * (productById[r.product]?.synthetic_purchase_cost_eur ?? 0);
   }
-  const wearerMonths = rs.reduce((s, r) => s + r.wearers, 0);
+  // Wearers are listed per garment line; take the largest line per site-month to avoid double counting.
+  const wm = new Map<string, number>();
+  for (const r of rs) wm.set(r.month + r.site, Math.max(wm.get(r.month + r.site) ?? 0, r.wearers));
+  let wearerMonths = 0;
+  for (const [k, v] of wm) {
+    wearerMonths += v;
+    if (k.startsWith(last ?? "")) t.wearers += v;
+  }
   return {
     ...t,
     utilisation: utilisation(t.washed, t.allocatedMonths),
@@ -241,7 +245,6 @@ export function exceptionRows(rs: Row[], band: Band) {
       if (r.allocated === 0) reasons.push("No garments allocated");
       else if (u < band.low - 10) reasons.push(`Very low utilisation (${u.toFixed(0)}%)`);
       else if (u > band.high + 4) reasons.push(`Very high utilisation (${u.toFixed(0)}%)`);
-      if (r.wearers > r.allocated) reasons.push("More wearers than garments");
       return { row: r, util: u, reasons };
     })
     .filter((x) => x.reasons.length);

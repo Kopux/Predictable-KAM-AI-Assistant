@@ -37,7 +37,7 @@ export function buildDeck(
       kicker: "Account overview",
       big: [
         { value: fmt(t.inCirculation), label: "garments in circulation" },
-        { value: fmt(t.wearers), label: "active wearers" },
+        { value: fmt(t.wearers), label: "active wearers (Dec)" },
         { value: String(sites.length), label: "sites served" },
       ],
       bullets: [
