@@ -15,3 +15,7 @@
 # Presentation graphs
 - [x] Include the displayed graphs in PowerPoint without changing calculations.
 - [x] Make PDF graphs ready before printing and verify downloaded files.
+
+# Executive visual redesign
+- [ ] Restyle header, connected steps, account banner, metric tiles, steering briefing and utilisation gauge without changing calculations or exports.
+- [ ] Verify desktop/mobile interactions and run existing regression tests.
