@@ -1,7 +1,7 @@
 import type { Slide } from "./story";
 import { ATTENDEES, type Attendee } from "./store";
 
-export async function exportPptx(customerName: string, summary: string, slides: Slide[], attendees: Attendee[], aiSession?: string, isSample = false) {
+export async function exportPptx(customerName: string, summary: string, slides: Slide[], attendees: Attendee[], aiSession?: string, isSample = false, chartImages: Record<string, string> = {}) {
   const { default: PptxGenJS } = await import("pptxgenjs");
   const pptx = new PptxGenJS();
   pptx.layout = "LAYOUT_WIDE";
@@ -24,13 +24,16 @@ export async function exportPptx(customerName: string, summary: string, slides: 
     sl.addText(s.kicker.toUpperCase(), { x: 0.6, y: 0.4, w: 8, fontSize: 12, color: ACC, bold: true, charSpacing: 3 });
     sl.addText(`${i + 1}`, { x: 12, y: 0.4, w: 0.8, fontSize: 12, color: FG, align: "right" });
     sl.addText(s.title, { x: 0.6, y: 0.8, w: 12, h: 1, fontSize: 30, color: FG, bold: true });
+    const chartImage = chartImages[s.id];
+    if (s.chart && !chartImage) throw new Error(`Missing graph for ${s.title}`);
+    if (chartImage) sl.addImage({ data: chartImage, x: 5.3, y: 2.0, w: 7.4, h: 3.1 });
     s.big.forEach((b, j) => {
-      sl.addText(b.value, { x: 0.6 + j * 4.1, y: 2.2, w: 4, fontSize: 36, color: ACC, bold: true });
-      sl.addText(b.label, { x: 0.6 + j * 4.1, y: 2.9, w: 4, fontSize: 14, color: FG });
+      sl.addText(b.value, { x: chartImage ? 0.6 : 0.6 + j * 4.1, y: chartImage ? 2.0 + j * 1.4 : 2.2, w: 4, h: 0.6, fontSize: 36, color: ACC, bold: true });
+      sl.addText(b.label, { x: chartImage ? 0.6 : 0.6 + j * 4.1, y: chartImage ? 2.65 + j * 1.4 : 2.9, w: 4, h: 0.6, fontSize: 14, color: FG });
     });
     sl.addText(
       s.bullets.map((b) => ({ text: b, options: { bullet: true } })),
-      { x: 0.6, y: s.big.length ? 3.9 : 2.2, w: 12, h: 3, fontSize: 18, color: FG, valign: "top", paraSpaceAfter: 8 },
+      { x: chartImage ? 5.3 : 0.6, y: chartImage ? 5.3 : s.big.length ? 3.9 : 2.2, w: chartImage ? 7.4 : 12, h: chartImage ? 1.7 : 3, fontSize: chartImage ? 14 : 18, color: FG, valign: "top", paraSpaceAfter: 8 },
     );
     const notes = attendees
       .flatMap((a) => (s.talking[a] ?? []).map((t) => `[${ATTENDEES.find((x) => x.id === a)?.label}] ${t}`))

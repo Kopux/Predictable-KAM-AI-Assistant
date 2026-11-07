@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ArrowLeft, ChevronLeft, ChevronRight, ClipboardCopy, Download, Eye, EyeOff, FileSpreadsheet, MessageSquareQuote, Printer } from "lucide-react";
 import { ATTENDEES, useKam } from "@/lib/kam/store";
@@ -7,6 +7,7 @@ import { customerRows } from "@/lib/kam/metrics";
 import { sampleDataset } from "@/lib/kam/data";
 import { buildDeck } from "@/lib/kam/story";
 import { exportPptx } from "@/lib/kam/exportPptx";
+import { captureDeckCharts, readyDeckCharts } from "@/lib/kam/captureCharts";
 import { copilotPrompt, exportCopilotWorkbook } from "@/lib/kam/exportCopilot";
 import { getChatSession, sessionTranscript } from "@/lib/kam/chatSession";
 import { SlideView } from "@/components/kam/SlideView";
@@ -40,6 +41,7 @@ function Deck() {
   const idx = Math.min(cur, Math.max(visible.length - 1, 0));
   const slide = visible[idx];
   const [busy, setBusy] = useState(false);
+  const exportDeck = useRef<HTMLDivElement>(null);
 
   const notesText = () =>
     [
@@ -78,16 +80,29 @@ function Deck() {
           >
             <ClipboardCopy className="mr-1 h-4 w-4" /> Copy notes
           </Button>
-          <Button variant="outline" onClick={() => window.print()}>
+          <Button variant="outline" disabled={busy || !visible.length} onClick={async () => {
+            if (!exportDeck.current) return;
+            setBusy(true);
+            try {
+              await readyDeckCharts(exportDeck.current, visible);
+              window.print();
+            } catch {
+              toast.error("Could not prepare the graphs. Please try again.");
+            } finally {
+              setBusy(false);
+            }
+          }}>
             <Printer className="mr-1 h-4 w-4" /> Print / PDF
           </Button>
           <Button
-            disabled={busy}
+            disabled={busy || !visible.length}
             onClick={async () => {
               setBusy(true);
               try {
+                if (!exportDeck.current) throw new Error("Slides are not ready");
+                const chartImages = await captureDeckCharts(exportDeck.current, visible);
                 const msgs = getChatSession().messages;
-                await exportPptx(customer.customer_name, deck.summary, visible, attendees, msgs.length ? sessionTranscript(msgs, customer.customer_name) : undefined, isSample);
+                await exportPptx(customer.customer_name, deck.summary, visible, attendees, msgs.length ? sessionTranscript(msgs, customer.customer_name) : undefined, isSample, chartImages);
                 toast.success("PowerPoint downloaded");
               } catch {
                 toast.error("Could not create the PowerPoint");
@@ -127,7 +142,7 @@ function Deck() {
         </div>
       </div>
 
-      <section className="rounded-2xl border-l-4 border-accent bg-card p-5 shadow-sm">
+      <section className="no-print rounded-2xl border-l-4 border-accent bg-card p-5 shadow-sm">
         <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Executive summary</p>
         <p className="mt-2 text-lg leading-relaxed">{deck.summary}</p>
       </section>
@@ -207,9 +222,9 @@ function Deck() {
         </aside>
       </div>
 
-      <div className="hidden space-y-4 print:block">
+      <div ref={exportDeck} className="export-deck" aria-hidden="true">
         {visible.map((s, i) => (
-          <SlideView key={s.id} slide={s} index={i} rows={rows} data={data} band={band} customerName={customer.customer_name} isSample={isSample} />
+          <SlideView key={s.id} slide={s} index={i} rows={rows} data={data} band={band} customerName={customer.customer_name} isSample={isSample} staticChart />
         ))}
       </div>
     </div>

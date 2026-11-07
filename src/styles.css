@@ -121,7 +121,29 @@
   }
 }
 
+.export-deck {
+  position: fixed;
+  left: -20000px;
+  top: 0;
+  width: 1200px;
+  pointer-events: none;
+}
+
 @media print {
+  @page { size: 1200px 675px; margin: 0; }
   .no-print { display: none !important; }
-  .print-slide { break-after: page; }
+  body:has(.export-deck) { margin: 0; }
+  body:has(.export-deck) main { max-width: none; padding: 0; }
+  .export-deck { position: static; width: 1200px; margin: 0 !important; }
+  .export-deck .print-slide {
+    width: 1200px;
+    height: 675px;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    break-inside: avoid;
+    break-after: page;
+    print-color-adjust: exact;
+  }
+  .export-deck .print-slide:last-child { break-after: auto; }
 }

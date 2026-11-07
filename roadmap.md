@@ -11,3 +11,7 @@
 - [x] Phase 1: Context Bar (company, import, period presets, prominent Ask AI).
 - [x] Phase 2: user tags `v2-generic` in GitHub (waiting on user).
 - [x] Phase 3: Lindström name, colours, font (after Phase 2).
+
+# Presentation graphs
+- [ ] Include the displayed graphs in PowerPoint without changing calculations.
+- [ ] Make PDF graphs ready before printing and verify downloaded files.
