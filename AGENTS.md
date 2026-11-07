@@ -34,6 +34,7 @@ use the editor.
 - Meeting state (account, exclusions, band overrides, attendees, priorities) lives in `KamProvider` (localStorage) so it persists across the 3 steps and Advanced mode.
 - Keep the KAM context object in a separate browser-safe module from its provider so live provider updates cannot disconnect existing consumers.
 - Workbook parsing uses a browser-only dynamic SheetJS import; datasets are retained in local IndexedDB and passed explicitly to metrics to isolate each browser's private data from SSR and other users.
+- Persist the complete active dataset under the IndexedDB `active` key; migrate legacy `imports` only when no active snapshot exists, so deleted sample rows never return on reload. Manage deletion by customer/year groups, preserving IDs of surviving rows.
 - Imported month/site/product keys are append-only with existing records winning; previews report skipped keys so re-imports cannot double count or overwrite source data.
 - Resolve workbook customer aliases and customer-scoped site aliases before validation/aggregation; retain source IDs locally so repeated imports and later years reuse the same identities without changing existing dataset keys.
 - The "Ask the data" assistant sends only the aggregated per-account summary from `src/lib/kam/aiContext.ts` (never raw rows) to the AI through the `/api/chat` server route; the chat session lives in memory only and is exported as .txt or a PPTX notes slide, so no cloud storage is needed.

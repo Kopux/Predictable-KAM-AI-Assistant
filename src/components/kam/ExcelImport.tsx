@@ -1,14 +1,14 @@
 import { useRef, useState } from "react";
-import { FileSpreadsheet, Upload, ShieldCheck, AlertTriangle, CheckCircle2, Loader2, X, Trash2 } from "lucide-react";
+import { FileSpreadsheet, Upload, ShieldCheck, AlertTriangle, CheckCircle2, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useKam } from "@/lib/kam/store";
 import type { ImportPreview } from "@/lib/kam/importWorkbook";
+import { DataRemoval } from "./DataRemoval";
 
 export function ExcelImport() {
-  const { data, importData, dataReady, hasImports, clearImports } = useKam();
-  const [confirmClear, setConfirmClear] = useState(false);
+  const { data, importData, dataReady } = useKam();
   const removeFile = () => { setPreview(null); setFilename(""); setError(""); setSuccess(""); };
   const input = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
@@ -50,21 +50,7 @@ export function ExcelImport() {
           <span className="text-xs text-muted-foreground">.xlsx / .xls · Reference workbook worksheets and column names</span>
         </div>
         <p className="text-xs text-muted-foreground">Required: Customers, Sites, Products, Service_Activity, Customer_Impacts, Repairs. Optional: Service_Cycles, Laundries, Waste_Circularity, Industry_Priorities.</p>
-        {hasImports && (
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm">
-            <span>{confirmClear ? "Delete all imported companies and years from this browser? Sample data stays." : "Imported data is saved in this browser."}</span>
-            <div className="flex gap-2">
-              {confirmClear && <Button variant="outline" size="sm" onClick={() => setConfirmClear(false)}>Cancel</Button>}
-              <Button variant="destructive" size="sm" disabled={busy} onClick={async () => {
-                if (!confirmClear) { setConfirmClear(true); return; }
-                setBusy(true);
-                try { await clearImports(); removeFile(); setSuccess("All imported data was removed. Only the sample data remains."); }
-                catch { setError("Could not remove the saved data. Try again."); }
-                finally { setBusy(false); setConfirmClear(false); }
-              }}><Trash2 className="h-4 w-4" /> {confirmClear ? "Yes, delete" : "Remove all imported data"}</Button>
-            </div>
-          </div>
-        )}
+        {!busy && <DataRemoval onRemoved={removeFile} />}
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
         {success && <p role="status" className="flex items-center gap-2 text-sm text-success"><CheckCircle2 className="h-4 w-4" />{success}</p>}
         {preview && <>
