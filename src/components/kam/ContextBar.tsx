@@ -128,7 +128,6 @@ export function ContextBar() {
             <button role="radio" aria-checked={year === "all"} onClick={() => setYear("all")} className={chip(year === "all")}>All</button>
           </div>
           </div>
-          <div className="sm:hidden">{data.customers.length > 0 && <AskDataButton floating />}</div>
         </div>
 
         <div className="hidden sm:block lg:ml-auto">
