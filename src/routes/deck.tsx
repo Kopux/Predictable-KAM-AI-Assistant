@@ -6,6 +6,7 @@ import { ATTENDEES, useKam } from "@/lib/kam/store";
 import { customerRows } from "@/lib/kam/metrics";
 import { buildDeck } from "@/lib/kam/story";
 import { exportPptx } from "@/lib/kam/exportPptx";
+import { getChatSession, sessionTranscript } from "@/lib/kam/chatSession";
 import { SlideView } from "@/components/kam/SlideView";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -82,7 +83,8 @@ function Deck() {
             onClick={async () => {
               setBusy(true);
               try {
-                await exportPptx(customer.customer_name, deck.summary, visible, attendees);
+                const msgs = getChatSession().messages;
+                await exportPptx(customer.customer_name, deck.summary, visible, attendees, msgs.length ? sessionTranscript(msgs, customer.customer_name) : undefined);
                 toast.success("PowerPoint downloaded");
               } catch {
                 toast.error("Could not create the PowerPoint");
