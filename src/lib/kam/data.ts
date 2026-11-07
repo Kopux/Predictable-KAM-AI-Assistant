@@ -2,6 +2,7 @@ import pack from "@/data/pack.json";
 
 export type Customer = {
   customer_id: string;
+  source_customer_id?: string;
   customer_name: string;
   industry: string;
   segment: string;
@@ -10,6 +11,7 @@ export type Customer = {
 };
 export type Site = {
   site_id: string;
+  source_site_id?: string;
   customer_id: string;
   site_name: string;
   country: string;
