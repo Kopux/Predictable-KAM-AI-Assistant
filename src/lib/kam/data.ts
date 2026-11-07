@@ -52,6 +52,7 @@ export type Row = {
   cycles: number;
   cycleHours: number;
   onTime: number;
+  recycledKg?: number;
 };
 
 const cols = pack.cols as string[];

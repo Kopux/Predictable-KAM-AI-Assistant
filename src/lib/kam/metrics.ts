@@ -103,7 +103,7 @@ export function totals(rs: Row[], data: Dataset = sampleDataset): Totals {
     t.energySaved += r.energySaved;
     t.avoidedCo2 += r.avoidedCo2;
     t.textileWaste += r.textileWaste;
-    t.recycledKg += r.textileWaste * (recyclingShare[r.laundry] ?? 0);
+    t.recycledKg += r.recycledKg ?? (data === sampleDataset || r.id < sampleDataset.rows.length ? r.textileWaste * (recyclingShare[r.laundry] ?? 0) : 0);
     t.cycles += r.cycles;
     t.onTime += r.onTime;
     t.cycleHours += r.cycleHours;
