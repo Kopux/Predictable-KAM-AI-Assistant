@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Bar, BarChart, Cell, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { AlertTriangle, ArrowRight, Droplets, Euro, Leaf, RotateCcw, Shirt, WashingMachine, Wrench, Eye, EyeOff } from "lucide-react";
+import { AlertTriangle, ArrowRight, Building2, CalendarRange, CheckCircle2, Droplets, Euro, Leaf, MapPin, RotateCcw, Shirt, WashingMachine, Wrench, Eye, EyeOff } from "lucide-react";
 import { useKam } from "@/lib/kam/store";
 import {
   allCustomerRows,
@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { periodLabel } from "@/lib/kam/period";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -60,20 +61,28 @@ function Pulse() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-wider text-accent">Step 1 · Account Pulse</p>
-          <h1 className="text-4xl font-extrabold">{customer.customer_name}</h1>
-          <p className="text-muted-foreground">
-            {customer.industry} · {customer.segment} · {sites.length} sites · {period} · changes compare the second half of the period with the first
-          </p>
+      <section className="executive-banner rounded-3xl px-6 py-7 text-executive-foreground sm:px-8 sm:py-8" aria-label="Account overview">
+        <div className="flex flex-wrap items-end justify-between gap-6">
+        <div className="min-w-0 flex-1 basis-96">
+          <p className="text-xs font-semibold uppercase text-executive-muted">Step 1 · Account Pulse</p>
+          <h1 className="mt-3 break-words text-3xl font-extrabold leading-tight sm:text-4xl">{customer.customer_name}</h1>
+          <div className="mt-5 flex flex-wrap gap-2 text-xs font-medium">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-executive-foreground/15 bg-executive-foreground/10 px-3 py-1.5 backdrop-blur-md"><Building2 className="h-3.5 w-3.5" />{customer.industry}</span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-executive-foreground/15 bg-executive-foreground/10 px-3 py-1.5 backdrop-blur-md"><CalendarRange className="h-3.5 w-3.5" />{periodLabel(year)} · {period}</span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-executive-foreground/15 bg-executive-foreground/10 px-3 py-1.5 backdrop-blur-md"><MapPin className="h-3.5 w-3.5" />{sites.length} sites</span>
+            <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 ${inBand ? "border-success/50 bg-success/20" : "border-warning/50 bg-warning/20"}`}>
+              {inBand ? <CheckCircle2 className="h-3.5 w-3.5 text-success" /> : <AlertTriangle className="h-3.5 w-3.5 text-warning" />}
+              {inBand ? "Healthy" : "Action required"} · {t.utilisation.toFixed(0)}% utilisation
+            </span>
+          </div>
         </div>
-        <Button asChild size="lg">
+        <Button asChild size="lg" variant="secondary" className="group h-11 shrink-0 bg-executive-foreground px-5 text-primary hover:bg-executive-foreground/90">
           <Link to="/meeting">
-            Next: tailor the meeting <ArrowRight className="ml-1 h-4 w-4" />
+            Tailor Meeting <ArrowRight className="tailor-arrow ml-1 h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
           </Link>
         </Button>
       </div>
+      </section>
 
       {excludedHere > 0 && (
         <div className="flex flex-wrap items-center gap-3 rounded-xl border border-warning/50 bg-warning/10 px-4 py-2 text-sm">
@@ -87,13 +96,14 @@ function Pulse() {
       <SteeringBriefing t={t} band={band} sites={sites} outs={outs} />
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
-        <Kpi icon={<Shirt className="h-4 w-4" />} label="Garments in circulation" value={fmt(t.inCirculation)} sub={`${fmt(t.wearers)} wearers (latest month)`} />
-        <Kpi icon={<WashingMachine className="h-4 w-4" />} label="Washing frequency" value={`${t.washesPerWearerWeek.toFixed(1)}×`} sub="per wearer / week" delta={pctChange(h2.washesPerWearerWeek, h1.washesPerWearerWeek)} />
-        <Kpi icon={<Wrench className="h-4 w-4" />} label="Repair rate" value={t.repairRate.toFixed(2)} sub="per 100 washes" delta={pctChange(h2.repairRate, h1.repairRate)} goodWhenUp={false} />
-        <Kpi icon={<Euro className="h-4 w-4" />} label="Cost avoided" value={`€${fmtK(t.costAvoided)}`} sub="new garments not bought (est.)" delta={pctChange(h2.costAvoided, h1.costAvoided)} />
-        <Kpi icon={<Leaf className="h-4 w-4" />} label="CO₂e saved" value={`${fmt(t.co2Saved / 1000, 1)} t`} sub="vs local laundry" delta={pctChange(h2.co2Saved, h1.co2Saved)} />
-        <Kpi icon={<Droplets className="h-4 w-4" />} label="Water saved" value={`${fmt(t.waterSaved / 1000)} m³`} sub="vs local laundry" delta={pctChange(h2.waterSaved, h1.waterSaved)} />
+        <Kpi provenance="Measured" icon={<Shirt className="h-4 w-4" />} label="Garments in circulation" value={fmt(t.inCirculation)} sub={`${fmt(t.wearers)} wearers (latest month)`} />
+        <Kpi provenance="Calculated" icon={<WashingMachine className="h-4 w-4" />} label="Washing frequency" value={`${t.washesPerWearerWeek.toFixed(1)}×`} sub="per wearer / week" delta={pctChange(h2.washesPerWearerWeek, h1.washesPerWearerWeek)} />
+        <Kpi provenance="Calculated" icon={<Wrench className="h-4 w-4" />} label="Repair rate" value={t.repairRate.toFixed(2)} sub="per 100 washes" delta={pctChange(h2.repairRate, h1.repairRate)} goodWhenUp={false} />
+        <Kpi provenance="Estimated" icon={<Euro className="h-4 w-4" />} label="Cost avoided" value={`€${fmtK(t.costAvoided)}`} sub="new garments not bought (est.)" delta={pctChange(h2.costAvoided, h1.costAvoided)} />
+        <Kpi provenance="Estimated" icon={<Leaf className="h-4 w-4" />} label="CO₂e saved" value={`${fmt(t.co2Saved / 1000, 1)} t`} sub="vs local laundry" delta={pctChange(h2.co2Saved, h1.co2Saved)} />
+        <Kpi provenance="Estimated" icon={<Droplets className="h-4 w-4" />} label="Water saved" value={`${fmt(t.waterSaved / 1000)} m³`} sub="vs local laundry" delta={pctChange(h2.waterSaved, h1.waterSaved)} />
       </div>
+      <p className="text-xs text-muted-foreground">Changes compare the second half of the selected period with the first.</p>
 
       <div className="grid gap-6 lg:grid-cols-5">
         <div className="lg:col-span-2">
@@ -117,7 +127,7 @@ function Pulse() {
               <span>100%</span>
             </div>
           </div>
-          <div className="mt-5 rounded-xl bg-muted p-3">
+          <div className="mt-5 border-t border-border/60 pt-4">
             <p className="text-sm font-medium">KAM override</p>
             <p className="text-xs text-muted-foreground">
               Default for {customer.industry}: {def.low}–{def.high}%
