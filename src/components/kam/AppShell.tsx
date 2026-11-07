@@ -23,8 +23,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground">
               <Shirt className="h-5 w-5" />
             </span>
-            <span className="font-display text-lg font-bold leading-none">
-              KAM Meeting<span className="text-accent">.</span>
+            <span className="leading-none">
+              <span className="block font-display text-lg font-extrabold tracking-tight text-primary">Lindström</span>
+              <span className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">KAM Assistant</span>
             </span>
           </Link>
 

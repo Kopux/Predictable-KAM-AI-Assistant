@@ -26,9 +26,9 @@ import { Badge } from "@/components/ui/badge";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Account Pulse — KAM Meeting Assistant" },
+      { title: "Account Pulse — Lindström KAM Assistant" },
       { name: "description", content: "Health check of a workwear rental account: garments, washing, repairs, cost and environmental impact." },
-      { property: "og:title", content: "Account Pulse — KAM Meeting Assistant" },
+      { property: "og:title", content: "Account Pulse — Lindström KAM Assistant" },
       { property: "og:description", content: "Health check of a workwear rental account before the customer meeting." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -155,7 +155,7 @@ function Pulse() {
         </div>
 
         <div className="lg:col-span-3">
-          <Section title="Utilisation by site" desc="Green zone = healthy band. Orange bars sit outside it.">
+          <Section title="Utilisation by site" desc="Green zone = healthy band. Light-blue bars sit outside it.">
             <div className="h-[340px]">
               <ResponsiveContainer>
                 <BarChart data={sites.map((s) => ({ name: s.name.replace(customer.customer_name.split(" ")[0] ?? "", "").trim(), u: +s.utilisation.toFixed(1) }))} margin={{ left: -10, bottom: 50 }}>

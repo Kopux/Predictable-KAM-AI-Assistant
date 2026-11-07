@@ -11,9 +11,9 @@ import { Section } from "@/components/kam/bits";
 export const Route = createFileRoute("/advanced")({
   head: () => ({
     meta: [
-      { title: "Advanced Analytics — KAM Meeting Assistant" },
+      { title: "Advanced Analytics — Lindström KAM Assistant" },
       { name: "description", content: "Deep-dive by site, month, garment type, repairs and laundry circularity." },
-      { property: "og:title", content: "Advanced Analytics — KAM Meeting Assistant" },
+      { property: "og:title", content: "Advanced Analytics — Lindström KAM Assistant" },
       { property: "og:description", content: "Deep-dive analytics for workwear rental accounts." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
