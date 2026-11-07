@@ -90,11 +90,11 @@ function Pulse() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-5">
+        <div className="lg:col-span-2">
         <Section
           title="Garment utilisation"
           desc="Weekly washes compared with garments allocated. Too low = idle stock, too high = wearers may run short."
         >
-          <div className="lg:col-span-2" />
           <div className="flex items-end gap-3">
             <span className={`font-display text-6xl font-extrabold ${inBand ? "text-success" : "text-warning"}`}>{t.utilisation.toFixed(0)}%</span>
             <Badge variant={inBand ? "secondary" : "outline"} className="mb-3">
@@ -146,6 +146,7 @@ function Pulse() {
             </div>
           </div>
         </Section>
+        </div>
 
         <div className="lg:col-span-3">
           <Section title="Utilisation by site" desc="Green zone = healthy band. Orange bars sit outside it.">
