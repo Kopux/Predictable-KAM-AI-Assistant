@@ -95,13 +95,19 @@ export function AskDataChat({ className = "" }: { className?: string }) {
   );
 }
 
-export function AskDataButton() {
+export function AskDataButton({ floating = false }: { floating?: boolean }) {
   return (
     <Sheet>
       <SheetTrigger asChild>
+        {floating ? (
+          <Button aria-label="Ask AI about this account" className="no-print fixed bottom-4 right-4 z-40 h-12 rounded-full bg-accent px-5 text-accent-foreground shadow-lg hover:bg-accent/90">
+            <MessageCircleQuestion className="mr-1 h-5 w-5" /> Ask AI
+          </Button>
+        ) : (
         <Button className="bg-accent text-accent-foreground shadow-md hover:bg-accent/90">
           <MessageCircleQuestion className="mr-1 h-4 w-4" /> Ask AI about this account
         </Button>
+        )}
       </SheetTrigger>
       <SheetContent className="flex w-full flex-col sm:max-w-lg">
         <SheetHeader>
