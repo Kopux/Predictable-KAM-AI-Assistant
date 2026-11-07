@@ -140,7 +140,7 @@ export function siteStats(rs: Row[]): SiteStat[] {
   const by = new Map<string, Row[]>();
   for (const r of rs) by.set(r.site, [...(by.get(r.site) ?? []), r]);
   return [...by.entries()].map(([siteId, list]) => {
-    const s = siteById[siteId];
+    const s = siteById[siteId]!;
     return { ...totals(list), siteId, name: s.site_name, type: s.site_type, city: s.city, country: s.country };
   });
 }
@@ -263,7 +263,7 @@ export function monthlyTrend(rs: Row[]) {
 }
 
 export function findCustomer(id: string) {
-  return customers.find((c) => c.customer_id === id) ?? customers[0];
+  return customers.find((c) => c.customer_id === id) ?? customers[0]!;
 }
 
 export const fmt = (n: number, d = 0) =>

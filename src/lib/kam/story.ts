@@ -73,7 +73,7 @@ export function buildDeck(
           low.length ? `Right-sizing ${low.length} sites could release ~${fmt(releasable)} garments from the contract.` : "Garment levels match actual use — the contract is well sized.",
         ],
         operations: [
-          high.length ? `${high[0].name} washes garments very often — are wearers ever short?` : "Ask whether lockers feel over-stocked at any site.",
+          high.length ? `${high[0]!.name} washes garments very often — are wearers ever short?` : "Ask whether lockers feel over-stocked at any site.",
         ],
       },
       tags: ["cost", "hygiene", "procurement", "operations"],

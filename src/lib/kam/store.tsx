@@ -42,7 +42,7 @@ type Ctx = State & {
 
 const KEY = "kam-assistant-v1";
 const initial: State = {
-  customerId: customers[0].customer_id,
+  customerId: customers[0]!.customer_id,
   excluded: [],
   bands: {},
   attendees: ["procurement", "sustainability"],

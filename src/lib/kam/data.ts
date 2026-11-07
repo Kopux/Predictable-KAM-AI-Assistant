@@ -57,7 +57,7 @@ export type Row = {
 const cols = pack.cols as string[];
 export const rows: Row[] = (pack.rows as (string | number)[][]).map((r, id) => {
   const o: Record<string, string | number> = { id };
-  cols.forEach((c, i) => (o[c] = r[i]));
+  cols.forEach((c, i) => (o[c] = r[i] ?? 0));
   return o as unknown as Row;
 });
 

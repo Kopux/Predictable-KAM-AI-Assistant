@@ -152,7 +152,7 @@ function Pulse() {
           <Section title="Utilisation by site" desc="Green zone = healthy band. Orange bars sit outside it.">
             <div className="h-[340px]">
               <ResponsiveContainer>
-                <BarChart data={sites.map((s) => ({ name: s.name.replace(customer.customer_name.split(" ")[0], "").trim(), u: +s.utilisation.toFixed(1) }))} margin={{ left: -10, bottom: 50 }}>
+                <BarChart data={sites.map((s) => ({ name: s.name.replace(customer.customer_name.split(" ")[0] ?? "", "").trim(), u: +s.utilisation.toFixed(1) }))} margin={{ left: -10, bottom: 50 }}>
                   <ReferenceArea y1={band.low} y2={band.high} fill="var(--success)" fillOpacity={0.12} />
                   <XAxis dataKey="name" angle={-45} textAnchor="end" interval={0} fontSize={11} stroke="var(--muted-foreground)" />
                   <YAxis unit="%" fontSize={11} stroke="var(--muted-foreground)" />
