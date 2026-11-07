@@ -1,19 +1,20 @@
 import { describe, expect, it } from "vitest";
 import * as XLSX from "xlsx";
-import { readFileSync } from "node:fs";
+import fixture from "./fixtures/reference-workbook.json";
 import { parseWorkbook } from "@/lib/kam/importWorkbook";
 import { mergeDataset, sampleDataset } from "@/lib/kam/data";
 import { customerRows, monthlyTrend, totals } from "@/lib/kam/metrics";
 
 function workbook(year = "2026", newCompany = false) {
-  const w = XLSX.read(readFileSync("/tmp/reference-pack.xlsx"), { type: "buffer", cellDates: true });
+  const w = XLSX.utils.book_new();
+  for (const [name, records] of Object.entries(fixture)) XLSX.utils.book_append_sheet(w, XLSX.utils.json_to_sheet(records), name);
   for (const name of ["Service_Activity", "Customer_Impacts", "Repairs", "Service_Cycles", "Waste_Circularity", "Customers", "Sites"]) {
     const sheet = w.Sheets[name];
     if (!sheet) continue;
     const records = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet);
     for (const r of records) {
       if (r.month) r.month = String(r.month).replace("2025", year);
-      if (r.pickup_timestamp instanceof Date) r.pickup_timestamp.setUTCFullYear(Number(year));
+      if (r.pickup_timestamp) r.pickup_timestamp = String(r.pickup_timestamp).replace("2025", year);
       if (newCompany) {
         if (r.customer_id) r.customer_id = `NEW-${r.customer_id}`;
         if (r.customer_name) r.customer_name = `Imported ${r.customer_name}`;
