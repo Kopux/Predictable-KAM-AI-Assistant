@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { customers } from "./data";
+import { customers, sampleDataset, mergeDataset, type Dataset } from "./data";
+import { readLocalDataset, saveLocalDataset } from "./localDataset";
 import { defaultBandFor, findCustomer, type Band } from "./metrics";
 
 export type Attendee = "procurement" | "sustainability" | "operations";
@@ -19,6 +20,7 @@ export const PRIORITIES: { id: Priority; label: string }[] = [
 ];
 
 type State = {
+  year: string;
   customerId: string;
   excluded: number[];
   bands: Record<string, Band>;
@@ -28,6 +30,12 @@ type State = {
 };
 
 type Ctx = State & {
+  data: Dataset;
+  year: string;
+  years: string[];
+  setYear: (year: string) => void;
+  importData: (data: Dataset) => Promise<void>;
+  dataReady: boolean;
   customer: ReturnType<typeof findCustomer>;
   band: Band;
   excludedSet: Set<number>;
@@ -42,7 +50,8 @@ type Ctx = State & {
 
 const KEY = "kam-assistant-v1";
 const initial: State = {
-  customerId: customers[0]!.customer_id,
+  year: "all",
+  customerId: findCustomer("", sampleDataset).customer_id,
   excluded: [],
   bands: {},
   attendees: ["procurement", "sustainability"],
@@ -55,6 +64,12 @@ const C = createContext<Ctx | null>(null);
 export function KamProvider({ children }: { children: ReactNode }) {
   const [s, set] = useState<State>(initial);
   const [loaded, setLoaded] = useState(false);
+  const [data, setData] = useState(sampleDataset);
+  const [dataReady, setDataReady] = useState(false);
+
+  useEffect(() => {
+    readLocalDataset().then((saved) => { if (saved) setData(mergeDataset(sampleDataset, saved)); }).catch(() => {}).finally(() => setDataReady(true));
+  }, []);
 
   useEffect(() => {
     try {
@@ -70,10 +85,24 @@ export function KamProvider({ children }: { children: ReactNode }) {
   }, [s, loaded]);
 
   const value = useMemo<Ctx>(() => {
-    const customer = findCustomer(s.customerId);
+    const customer = findCustomer(s.customerId, data);
+    const siteIds = new Set(data.sites.filter((v) => v.customer_id === customer.customer_id).map((v) => v.site_id));
+    const years = [...new Set(data.rows.filter((v) => siteIds.has(v.site)).map((v) => v.month.slice(0, 4)))].sort();
     const toggle = <T,>(arr: T[], v: T) => (arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
     return {
       ...s,
+      data,
+      dataReady,
+      years,
+      year: years.includes(s.year) ? s.year : "all",
+      setYear: (year) => set((p) => ({ ...p, year })),
+      importData: async (incoming) => {
+        const merged = mergeDataset(data, incoming);
+        await saveLocalDataset(merged);
+        setData(merged);
+        const first = incoming.customers[0];
+        set((p) => ({ ...p, customerId: first?.customer_id ?? p.customerId, year: [...new Set(incoming.rows.map((r) => r.month.slice(0, 4)))].sort().at(-1) ?? "all" }));
+      },
       customer,
       band: s.bands[customer.customer_id] ?? defaultBandFor(customer.industry),
       excludedSet: new Set(s.excluded),
@@ -96,7 +125,7 @@ export function KamProvider({ children }: { children: ReactNode }) {
       togglePriority: (x) => set((p) => ({ ...p, priorities: toggle(p.priorities, x) })),
       toggleSlide: (id) => set((p) => ({ ...p, hiddenSlides: toggle(p.hiddenSlides, id) })),
     };
-  }, [s]);
+  }, [s, data, dataReady]);
 
   return <C.Provider value={value}>{children}</C.Provider>;
 }

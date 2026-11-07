@@ -52,6 +52,8 @@ export type Row = {
   cycles: number;
   cycleHours: number;
   onTime: number;
+  recycledKg?: number | undefined;
+  repairBreakdown?: Record<string, number>;
 };
 
 const cols = pack.cols as string[];
@@ -85,3 +87,40 @@ export const siteById = Object.fromEntries(sites.map((s) => [s.site_id, s]));
 export const productById = Object.fromEntries(products.map((p) => [p.product_id, p]));
 export const laundryById = Object.fromEntries(laundries.map((l) => [l.laundry_id, l]));
 export const months = Array.from(new Set(rows.map((r) => r.month))).sort();
+
+export type Dataset = {
+  rows: Row[];
+  customers: Customer[];
+  sites: Site[];
+  products: Product[];
+  laundries: typeof laundries;
+  repairTypes: typeof repairTypes;
+  waste: typeof waste;
+  industryPriorities: typeof industryPriorities;
+};
+
+export const sampleDataset: Dataset = { rows, customers, sites, products, laundries, repairTypes, waste, industryPriorities };
+
+export const rowKey = (r: Pick<Row, "month" | "site" | "product">) => `${r.month}|${r.site}|${r.product}`;
+
+/** Existing month/site/product lines win, so re-importing cannot double count. */
+export function mergeDataset(base: Dataset, incoming: Dataset): Dataset {
+  const merge = <T,>(a: T[], b: T[], key: (v: T) => string) => {
+    const map = new Map(a.map((v) => [key(v), v]));
+    b.forEach((v) => { if (!map.has(key(v))) map.set(key(v), v); });
+    return [...map.values()];
+  };
+  const keys = new Set(base.rows.map(rowKey));
+  let id = base.rows.reduce((n, r) => Math.max(n, r.id), -1) + 1;
+  const added = incoming.rows.filter((r) => !keys.has(rowKey(r))).map((r) => ({ ...r, id: id++ }));
+  return {
+    rows: [...base.rows, ...added],
+    customers: merge(base.customers, incoming.customers, (v) => v.customer_id),
+    sites: merge(base.sites, incoming.sites, (v) => v.site_id),
+    products: merge(base.products, incoming.products, (v) => v.product_id),
+    laundries: merge(base.laundries, incoming.laundries, (v) => v.laundry_id),
+    repairTypes: added.length ? [...base.repairTypes, ...incoming.repairTypes] : base.repairTypes,
+    waste: merge(base.waste, incoming.waste, (v) => v.laundry_id),
+    industryPriorities: merge(base.industryPriorities, incoming.industryPriorities, (v) => `${v.industry}|${v.priority_rank}`),
+  };
+}

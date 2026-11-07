@@ -25,11 +25,11 @@ export const Route = createFileRoute("/deck")({
 });
 
 function Deck() {
-  const { customer, attendees, priorities, excludedSet, band, hiddenSlides, toggleSlide } = useKam();
-  const rows = useMemo(() => customerRows(customer.customer_id, excludedSet), [customer, excludedSet]);
+  const { customer, attendees, priorities, excludedSet, band, hiddenSlides, toggleSlide, data, year } = useKam();
+  const rows = useMemo(() => customerRows(customer.customer_id, excludedSet, data, year), [customer, excludedSet, data, year]);
   const deck = useMemo(
-    () => buildDeck(rows, customer.customer_name, customer.industry, band, attendees, priorities),
-    [rows, customer, band, attendees, priorities],
+    () => buildDeck(rows, customer.customer_name, customer.industry, band, attendees, priorities, data),
+    [rows, customer, band, attendees, priorities, data],
   );
   const visible = deck.slides.filter((s) => !hiddenSlides.includes(s.id));
   const [cur, setCur] = useState(0);
@@ -130,7 +130,7 @@ function Deck() {
         <div>
           {slide ? (
             <>
-              <SlideView slide={slide} index={idx} rows={rows} band={band} customerName={customer.customer_name} />
+              <SlideView slide={slide} index={idx} rows={rows} data={data} band={band} customerName={customer.customer_name} />
               <div className="mt-3 flex items-center justify-center gap-4">
                 <Button variant="outline" size="icon" onClick={() => setCur(Math.max(0, idx - 1))} disabled={idx === 0} aria-label="Previous slide">
                   <ChevronLeft className="h-4 w-4" />
@@ -178,7 +178,7 @@ function Deck() {
 
       <div className="hidden space-y-4 print:block">
         {visible.map((s, i) => (
-          <SlideView key={s.id} slide={s} index={i} rows={rows} band={band} customerName={customer.customer_name} />
+          <SlideView key={s.id} slide={s} index={i} rows={rows} data={data} band={band} customerName={customer.customer_name} />
         ))}
       </div>
     </div>

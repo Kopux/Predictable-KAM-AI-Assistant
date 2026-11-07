@@ -38,15 +38,18 @@ const COLS: Col[] = [
 ];
 
 function Advanced() {
-  const { customer, excludedSet, band } = useKam();
-  const rs = useMemo(() => customerRows(customer.customer_id, excludedSet), [customer, excludedSet]);
+  const { customer, excludedSet, band, data, year } = useKam();
+  const rs = useMemo(() => customerRows(customer.customer_id, excludedSet, data, year), [customer, excludedSet, data, year]);
   const [sort, setSort] = useState<{ k: keyof SiteStat; asc: boolean }>({ k: "utilisation", asc: true });
-  const sites = siteStats(rs).sort((a, b) => ((a[sort.k] as number) - (b[sort.k] as number)) * (sort.asc ? 1 : -1));
-  const trend = monthlyTrend(rs);
-  const groups = groupBy(rs, productGroup);
+  const sites = siteStats(rs, data).sort((a, b) => ((a[sort.k] as number) - (b[sort.k] as number)) * (sort.asc ? 1 : -1));
+  const trend = monthlyTrend(rs, data);
+  const groups = groupBy(rs, (r) => productGroup(r, data), undefined, data);
+  const repairTypes = data.repairTypes;
+  const waste = data.waste;
+  const siteById = Object.fromEntries(data.sites.map((s) => [s.site_id, s]));
   const siteIds = new Set(rs.map((r) => r.site));
   const rtype = Object.entries(
-    repairTypes.filter(([s]) => siteIds.has(s) && siteById[s]?.customer_id === customer.customer_id).reduce<Record<string, number>>((m, [, t, n]) => ((m[t] = (m[t] ?? 0) + n), m), {}),
+    rs.some((r) => r.repairBreakdown) ? rs.reduce<Record<string, number>>((m, r) => { for (const [type, count] of Object.entries(r.repairBreakdown ?? {})) m[type] = (m[type] ?? 0) + count; return m; }, {}) : repairTypes.filter(([s]) => siteIds.has(s) && siteById[s]?.customer_id === customer.customer_id).reduce<Record<string, number>>((m, [, t, n]) => ((m[t] = (m[t] ?? 0) + n), m), {}),
   )
     .map(([t, n]) => ({ t, n }))
     .sort((a, b) => b.n - a.n);
@@ -176,7 +179,7 @@ function Advanced() {
               <thead className="text-left text-muted-foreground">
                 <tr>
                   <th className="py-1">Group</th>
-                  <th className="text-right">Garments (Dec)</th>
+                  <th className="text-right">Garments (latest)</th>
                   <th className="text-right">Washes</th>
                   <th className="text-right">Repairs</th>
                   <th className="text-right">Cost avoided €</th>

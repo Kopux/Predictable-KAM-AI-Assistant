@@ -1,4 +1,4 @@
-import type { Row } from "./data";
+import { sampleDataset, type Dataset, type Row } from "./data";
 import { fmt, fmtK, outliers, siteStats, totals, type Band } from "./metrics";
 import type { Attendee, Priority } from "./store";
 
@@ -20,35 +20,39 @@ export function buildDeck(
   band: Band,
   attendees: Attendee[],
   priorities: Priority[],
+  data: Dataset = sampleDataset,
 ) {
-  const t = totals(rs);
-  const sites = siteStats(rs);
-  const out = outliers(rs, band);
+  const t = totals(rs, data);
+  const sites = siteStats(rs, data);
+  const out = outliers(rs, band, data);
   const low = sites.filter((s) => s.utilisation < band.low);
   const high = sites.filter((s) => s.utilisation > band.high);
   const releasable = low.reduce((n, s) => n + Math.round(s.inCirculation * (1 - s.utilisation / band.low)), 0);
   const recyclePct = t.textileWaste ? (t.recycledKg / t.textileWaste) * 100 : 0;
+  const period = [...new Set(rs.map((r) => r.month.slice(0, 4)))].sort().join(", ");
+  const hasCycles = t.cycles > 0;
+  const hasRecycling = rs.some((r) => r.recycledKg !== undefined || r.id < sampleDataset.rows.length);
   const hygiene = ["Food & Beverage", "Healthcare"].includes(industry);
 
   const slides: Slide[] = [
     {
       id: "overview",
-      title: `${customerName} — your 2025 workwear service at a glance`,
+      title: `${customerName} — your ${period} workwear service at a glance`,
       kicker: "Account overview",
       big: [
         { value: fmt(t.inCirculation), label: "garments in circulation" },
-        { value: fmt(t.wearers), label: "active wearers (Dec)" },
+        { value: fmt(t.wearers), label: "active wearers (latest month)" },
         { value: String(sites.length), label: "sites served" },
       ],
       bullets: [
         `${fmtK(t.washed)} garment washes over ${t.monthsCount} months`,
         `${t.washesPerWearerWeek.toFixed(1)} washes per wearer per week`,
-        `${t.onTimePct.toFixed(0)}% of laundry cycles delivered on time`,
+        hasCycles ? `${t.onTimePct.toFixed(0)}% of laundry cycles delivered on time` : "Service timing data not supplied",
       ],
       talking: {
         procurement: [`Scale: ${fmt(t.inCirculation)} garments supporting ${fmt(t.wearers)} wearers across ${sites.length} sites.`],
         sustainability: ["Every wash happens in an industrial laundry with measured water and energy use — the basis for today's impact numbers."],
-        operations: [`${t.onTimePct.toFixed(0)}% on-time cycles — ask which sites feel this least.`],
+        operations: hasCycles ? [`${t.onTimePct.toFixed(0)}% on-time cycles — ask which sites feel this least.`] : [],
       },
       tags: ["procurement", "sustainability", "operations"],
       chart: "trend",
@@ -73,7 +77,7 @@ export function buildDeck(
           low.length ? `Right-sizing ${low.length} sites could release ~${fmt(releasable)} garments from the contract.` : "Garment levels match actual use — the contract is well sized.",
         ],
         operations: [
-          high.length ? `${high[0]!.name} washes garments very often — are wearers ever short?` : "Ask whether lockers feel over-stocked at any site.",
+          high.length ? `${high[0]?.name} washes garments very often — are wearers ever short?` : "Ask whether lockers feel over-stocked at any site.",
         ],
       },
       tags: ["cost", "hygiene", "procurement", "operations"],
@@ -168,7 +172,7 @@ export function buildDeck(
       ],
       bullets: [
         hygiene ? "Industrial process washing supports food/healthcare hygiene requirements" : "Controlled industrial washing keeps garments safe and compliant",
-        `${fmt(t.requests)} service requests logged this year`,
+        `${fmt(t.requests)} service requests logged in this period`,
       ],
       talking: {
         operations: [`Average cycle ${(t.cycleHours / Math.max(t.cycles, 1)).toFixed(0)} h — is that fast enough for shift patterns?`],
@@ -199,19 +203,20 @@ export function buildDeck(
   const score = (s: Slide) =>
     s.id === "overview" ? 100 : s.id === "actions" ? -100 : s.tags.filter((x) => priorities.includes(x as Priority)).length * 3 + s.tags.filter((x) => attendees.includes(x as Attendee)).length;
   const ordered = [...slides]
+    .filter((s) => (s.id !== "hygiene" || hasCycles) && (s.id !== "circular" || hasRecycling))
     .filter((s) => s.id === "overview" || s.id === "actions" || score(s) > 0)
     .sort((a, b) => score(b) - score(a));
 
   const summary = [
-    `In 2025 we served ${fmt(t.wearers)} wearers at ${sites.length} ${customerName} sites with ${fmt(t.inCirculation)} garments in circulation.`,
+    `In ${period} we served ${fmt(t.wearers)} wearers at ${sites.length} ${customerName} sites with ${fmt(t.inCirculation)} garments in circulation.`,
     priorities.includes("cost") || attendees.includes("procurement")
       ? `Repairs avoided an estimated €${fmtK(t.costAvoided)} in replacement purchases${low.length ? `, and right-sizing ${low.length} under-used sites could release ~${fmt(releasable)} garments` : ""}.`
       : "",
     priorities.includes("co2") || attendees.includes("sustainability")
       ? `Compared with local laundry, the service saved ${fmt(t.co2Saved / 1000, 1)} t CO₂e and ${fmt(t.waterSaved / 1000)} m³ of water.`
       : "",
-    priorities.includes("recycling") ? `${recyclePct.toFixed(0)}% of end-of-life textiles were recycled or reused.` : "",
-    `Utilisation is ${t.utilisation.toFixed(0)}% (healthy band ${band.low}–${band.high}%) and ${t.onTimePct.toFixed(0)}% of cycles were on time.`,
+    priorities.includes("recycling") && hasRecycling ? `${recyclePct.toFixed(0)}% of end-of-life textiles were recycled or reused.` : "",
+    `Utilisation is ${t.utilisation.toFixed(0)}% (healthy band ${band.low}–${band.high}%) ${hasCycles ? `and ${t.onTimePct.toFixed(0)}% of cycles were on time` : "— service timing data was not supplied"}.`,
   ]
     .filter(Boolean)
     .join(" ");

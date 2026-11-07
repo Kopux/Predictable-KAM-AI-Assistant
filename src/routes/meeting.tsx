@@ -33,14 +33,14 @@ const TOPIC_MAP: [RegExp, Priority][] = [
 ];
 
 function Meeting() {
-  const { customer, attendees, priorities, toggleAttendee, togglePriority, excludedSet, band } = useKam();
+  const { customer, attendees, priorities, toggleAttendee, togglePriority, excludedSet, band, data, year } = useKam();
   const suggested = useMemo(() => {
-    const text = customer.priority_topics + " " + industryPriorities.filter((p) => p.industry === customer.industry).map((p) => p.priority_theme).join(" ");
+    const text = customer.priority_topics + " " + data.industryPriorities.filter((p) => p.industry === customer.industry).map((p) => p.priority_theme).join(" ");
     return new Set(TOPIC_MAP.filter(([re]) => re.test(text)).map(([, p]) => p));
-  }, [customer]);
+  }, [customer, data]);
   const deck = useMemo(
-    () => buildDeck(customerRows(customer.customer_id, excludedSet), customer.customer_name, customer.industry, band, attendees, priorities),
-    [customer, excludedSet, band, attendees, priorities],
+    () => buildDeck(customerRows(customer.customer_id, excludedSet, data, year), customer.customer_name, customer.industry, band, attendees, priorities, data),
+    [customer, excludedSet, band, attendees, priorities, data, year],
   );
 
   return (

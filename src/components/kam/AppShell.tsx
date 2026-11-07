@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { Activity, BarChart3, Presentation, Users, Shirt } from "lucide-react";
-import { customers } from "@/lib/kam/data";
+import { ExcelImport } from "./ExcelImport";
 import { useKam } from "@/lib/kam/store";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
@@ -13,7 +13,7 @@ const STEPS = [
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { customer, setCustomer } = useKam();
+  const { customer, setCustomer, data, year, years, setYear } = useKam();
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const advanced = pathname.startsWith("/advanced");
@@ -32,17 +32,23 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Link>
 
           <div className="ml-auto flex flex-wrap items-center gap-3">
+            <ExcelImport />
             <Select value={customer.customer_id} onValueChange={setCustomer}>
               <SelectTrigger className="w-[240px] bg-card" aria-label="Customer account">
                 <SelectValue>{customer.customer_name}</SelectValue>
               </SelectTrigger>
               <SelectContent>
-                {customers.map((c) => (
+                {data.customers.map((c) => (
                   <SelectItem key={c.customer_id} value={c.customer_id}>
                     {c.customer_name}
                   </SelectItem>
                 ))}
               </SelectContent>
+            </Select>
+
+            <Select value={year} onValueChange={setYear}>
+              <SelectTrigger className="w-32 bg-card" aria-label="Data year"><SelectValue /></SelectTrigger>
+              <SelectContent><SelectItem value="all">All years</SelectItem>{years.map((y) => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent>
             </Select>
 
             <div role="tablist" aria-label="Mode" className="flex rounded-full border bg-card p-1 text-sm">
