@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Gavel, Leaf, PiggyBank, ShieldCheck, Shirt, ChevronDown } from "lucide-react";
 import type { Band, Outlier, SiteStat, Totals } from "@/lib/kam/metrics";
 import { fmt, fmtK } from "@/lib/kam/metrics";
+import { Button } from "@/components/ui/button";
 
 type Q = { icon: React.ReactNode; q: string; answer: string; detail: string; tone: "good" | "watch" | "act" };
 
@@ -54,7 +55,7 @@ export function buildSteeringQuestions(t: Totals, band: Band, sites: SiteStat[],
     {
       icon: <Gavel className="h-4 w-4" />,
       q: "What do we need the committee to decide today?",
-      answer: decisions[0]!.charAt(0).toUpperCase() + decisions[0]!.slice(1) + ".",
+      answer: (decisions[0] ?? "").charAt(0).toUpperCase() + (decisions[0] ?? "").slice(1) + ".",
       detail: decisions.length > 1 ? `Also: ${decisions.slice(1).join("; ")}.` : "",
       tone: "act",
     },
@@ -62,30 +63,35 @@ export function buildSteeringQuestions(t: Totals, band: Band, sites: SiteStat[],
 }
 
 const toneCls = { good: "border-l-success", watch: "border-l-warning", act: "border-l-accent" } as const;
+const categories = ["Cost & allocation", "Savings opportunity", "Service & hygiene", "Sustainability", "Committee decisions"];
 
 export function SteeringBriefing(props: { t: Totals; band: Band; sites: SiteStat[]; outs: Outlier[] }) {
   const qs = buildSteeringQuestions(props.t, props.band, props.sites, props.outs);
   const [open, setOpen] = useState<number | null>(null);
   return (
-    <section className="rounded-2xl border bg-card p-5 shadow-sm">
+    <section className="py-2">
       <h2 className="text-xl font-bold">Steering committee briefing</h2>
-      <p className="mb-4 text-sm text-muted-foreground">The 5 questions executives ask — answered from this account's data.</p>
+      <p className="mb-4 mt-1 text-sm text-muted-foreground">The 5 questions executives ask — answered from this account's data.</p>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
         {qs.map((x, i) => (
-          <button
+          <div key={x.q} className={`self-start overflow-hidden rounded-lg border border-l-4 border-border/60 bg-card shadow-sm ${toneCls[x.tone]}`}>
+          <Button variant="ghost"
             key={x.q}
             type="button"
             onClick={() => setOpen(open === i ? null : i)}
-            className={`rounded-xl border border-l-4 bg-background p-3 text-left transition-colors hover:bg-muted ${toneCls[x.tone]}`}
+            aria-expanded={open === i}
+            aria-controls={`briefing-evidence-${i}`}
+            className="block h-auto w-full whitespace-normal rounded-none p-4 text-left hover:bg-muted/50 hover:text-foreground"
           >
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              {x.icon} Q{i + 1}
-              <ChevronDown className={`ml-auto h-3.5 w-3.5 transition-transform ${open === i ? "rotate-180" : ""}`} />
+            <div className="flex items-start gap-2 text-[10px] font-semibold uppercase text-muted-foreground">
+              <span className="shrink-0 text-primary">{x.icon}</span><span className="leading-4">Q{i + 1} · {categories[i]}</span>
+              <ChevronDown className={`briefing-chevron ml-auto h-3.5 w-3.5 shrink-0 transition-transform duration-200 ${open === i ? "rotate-180" : ""}`} />
             </div>
-            <p className="mt-1 text-sm font-semibold">{x.q}</p>
-            <p className="mt-2 text-sm">{x.answer}</p>
-            {open === i && x.detail && <p className="mt-2 text-xs text-muted-foreground">{x.detail}</p>}
-          </button>
+            <p className="mt-3 text-xs leading-5 text-muted-foreground">{x.q}</p>
+            <p className="mt-2 text-sm font-bold leading-6">{x.answer}</p>
+          </Button>
+          {open === i && x.detail && <p id={`briefing-evidence-${i}`} className="border-t border-border/60 bg-muted/40 px-4 py-3 text-xs leading-5 text-muted-foreground">{x.detail}</p>}
+          </div>
         ))}
       </div>
     </section>

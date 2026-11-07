@@ -40,3 +40,4 @@ use the editor.
 - The "Ask the data" assistant sends only the aggregated per-account summary from `src/lib/kam/aiContext.ts` (never raw rows) to the AI through the `/api/chat` server route; the chat session lives in memory only and is exported as .txt or a PPTX notes slide, so no cloud storage is needed.
 - Period filter: `year` state holds "all", a year, or a preset id from `src/lib/kam/period.ts`; presets count back from the account's latest data month so imported data never shows empty ranges.
 - Keep export slides measurable off-screen with non-animated charts; wait for chart readiness before printing or capturing local PNGs for PowerPoint, preserving the active data and editable slide text.
+- Keep executive UI treatments in semantic global tokens and shared KAM presentation components; metric provenance is an optional display prop so visual redesigns do not alter calculations or export slides.

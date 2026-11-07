@@ -5,6 +5,7 @@ import { ContextBar } from "./ContextBar";
 import { cn } from "@/lib/utils";
 import { useKam } from "@/lib/kam/store";
 import { FileSpreadsheet } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const STEPS = [
   { to: "/" as const, n: 1, label: "Account Pulse", icon: Activity },
@@ -20,61 +21,60 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen">
-      <header className="no-print sticky top-0 z-30 border-b bg-background/90 backdrop-blur">
+      <header className="no-print sticky top-0 z-30 border-b border-border/40 bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3">
           <Link to="/" className="flex items-center gap-2">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground">
+            <span className="brand-badge grid h-10 w-10 place-items-center rounded-lg shadow-sm">
               <Shirt className="h-5 w-5" />
             </span>
             <span className="leading-none">
-              <span className="block font-display text-lg font-extrabold tracking-tight text-primary">Lindström</span>
-              <span className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">KAM Assistant</span>
+              <span className="block font-display text-lg font-extrabold text-foreground">Lindström</span>
+              <span className="mt-1 block text-[10px] font-semibold uppercase text-muted-foreground">KAM Assistant</span>
             </span>
           </Link>
 
           <div className="ml-auto flex flex-wrap items-center gap-3">
             <div role="tablist" aria-label="Mode" className="flex rounded-full border bg-card p-1 text-sm">
-              <button
+              <Button variant="ghost"
                 role="tab"
                 aria-selected={!advanced}
                 onClick={() => navigate({ to: "/" })}
                 className={cn("rounded-full px-4 py-1.5 font-medium transition", !advanced ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}
               >
                 Default
-              </button>
-              <button
+              </Button>
+              <Button variant="ghost"
                 role="tab"
                 aria-selected={advanced}
                 onClick={() => navigate({ to: "/advanced" })}
                 className={cn("flex items-center gap-1.5 rounded-full px-4 py-1.5 font-medium transition", advanced ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}
               >
                 <BarChart3 className="h-3.5 w-3.5" /> Advanced
-              </button>
+              </Button>
             </div>
           </div>
         </div>
 
         {!advanced && (
-          <nav className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 pb-3" aria-label="Meeting steps">
+          <nav className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-4 pb-4 pt-1" aria-label="Meeting steps">
             {STEPS.map((s, i) => {
               const active = pathname === s.to;
               const Icon = s.icon;
               return (
                 <div key={s.to} className="flex items-center gap-2">
+                  <Button asChild variant="ghost" className={cn("step-link group h-10 rounded-full border px-3 text-xs sm:px-4 sm:text-sm", active ? "step-current border-primary/30 bg-secondary text-primary hover:bg-secondary" : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground")}>
                   <Link
                     to={s.to}
-                    className={cn(
-                      "flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium transition whitespace-nowrap",
-                      active ? "border-primary bg-primary text-primary-foreground shadow-sm" : "bg-card hover:border-primary/40",
-                    )}
+                    aria-current={active ? "step" : undefined}
                   >
-                    <span className={cn("grid h-6 w-6 place-items-center rounded-full text-xs font-bold", active ? "bg-accent text-accent-foreground" : "bg-secondary text-secondary-foreground")}>
+                    <span className={cn("grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs font-bold", active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
                       {s.n}
                     </span>
-                    <Icon className="h-4 w-4" />
+                    <Icon className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5" />
                     {s.label}
                   </Link>
-                  {i < STEPS.length - 1 && <span className="h-px w-6 bg-border" />}
+                  </Button>
+                  {i < STEPS.length - 1 && <span className={cn("h-px w-4 shrink-0 sm:w-8", STEPS.findIndex((step) => step.to === pathname) > i ? "bg-primary/50" : "bg-border")} />}
                 </div>
               );
             })}
