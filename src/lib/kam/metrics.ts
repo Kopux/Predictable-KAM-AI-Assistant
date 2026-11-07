@@ -7,6 +7,8 @@ import {
   siteById,
   waste,
   type Row,
+  sampleDataset,
+  type Dataset,
 } from "./data";
 
 export const WEEKS_PER_MONTH = 52 / 12;
@@ -59,7 +61,9 @@ export function utilisation(washed: number, allocatedMonths: number) {
   return allocatedMonths > 0 ? (washed / (allocatedMonths * WEEKS_PER_MONTH)) * 100 : 0;
 }
 
-export function totals(rs: Row[]): Totals {
+export function totals(rs: Row[], data: Dataset = sampleDataset): Totals {
+  const productById = Object.fromEntries(data.products.map((p) => [p.product_id, p]));
+  const recyclingShare = Object.fromEntries(data.waste.map((w) => [w.laundry_id, w.textile_waste_total_kg ? (w.recycling_kg + w.reuse_kg) / w.textile_waste_total_kg : 0]));
   const ms = Array.from(new Set(rs.map((r) => r.month))).sort();
   const last = ms[ms.length - 1];
   const t = {
@@ -123,12 +127,13 @@ export function totals(rs: Row[]): Totals {
   };
 }
 
-export function customerRows(customerId: string, excluded: Set<number>) {
-  return allRows.filter((r) => siteById[r.site]?.customer_id === customerId && !excluded.has(r.id));
+export function customerRows(customerId: string, excluded: Set<number>, data: Dataset = sampleDataset, year = "all") {
+  const ids = new Set(data.sites.filter((s) => s.customer_id === customerId).map((s) => s.site_id));
+  return data.rows.filter((r) => ids.has(r.site) && !excluded.has(r.id) && (year === "all" || r.month.startsWith(year)));
 }
 
-export function allCustomerRows(customerId: string) {
-  return allRows.filter((r) => siteById[r.site]?.customer_id === customerId);
+export function allCustomerRows(customerId: string, data: Dataset = sampleDataset, year = "all") {
+  return customerRows(customerId, new Set(), data, year);
 }
 
 export const H1 = months.slice(0, 6);
@@ -140,26 +145,28 @@ export function pctChange(now: number, before: number) {
 
 export type SiteStat = Totals & { siteId: string; name: string; type: string; city: string; country: string };
 
-export function siteStats(rs: Row[]): SiteStat[] {
+export function siteStats(rs: Row[], data: Dataset = sampleDataset): SiteStat[] {
+  const siteById = Object.fromEntries(data.sites.map((s) => [s.site_id, s]));
   const by = new Map<string, Row[]>();
   for (const r of rs) by.set(r.site, [...(by.get(r.site) ?? []), r]);
-  return [...by.entries()].map(([siteId, list]) => {
-    const s = siteById[siteId]!;
-    return { ...totals(list), siteId, name: s.site_name, type: s.site_type, city: s.city, country: s.country };
+  return [...by.entries()].flatMap(([siteId, list]) => {
+    const s = siteById[siteId];
+    if (!s) return [];
+    return { ...totals(list, data), siteId, name: s.site_name, type: s.site_type, city: s.city, country: s.country };
   });
 }
 
 export type Group = { key: string; label: string } & Totals;
-export function groupBy(rs: Row[], keyFn: (r: Row) => string, labelFn: (k: string) => string = (k) => k): Group[] {
+export function groupBy(rs: Row[], keyFn: (r: Row) => string, labelFn: (k: string) => string = (k) => k, data: Dataset = sampleDataset): Group[] {
   const by = new Map<string, Row[]>();
   for (const r of rs) {
     const k = keyFn(r);
     by.set(k, [...(by.get(k) ?? []), r]);
   }
-  return [...by.entries()].map(([key, list]) => ({ key, label: labelFn(key), ...totals(list) }));
+  return [...by.entries()].map(([key, list]) => ({ key, label: labelFn(key), ...totals(list, data) }));
 }
 
-export const productGroup = (r: Row) => productById[r.product]?.product_group ?? r.product;
+export const productGroup = (r: Row, data: Dataset = sampleDataset) => data.products.find((p) => p.product_id === r.product)?.product_group ?? r.product;
 export const laundryName = (id: string) => laundryById[id]?.laundry_name ?? id;
 
 export type Outlier = {
@@ -172,12 +179,12 @@ export type Outlier = {
 };
 
 /** Plain-language explanations for sites that stand out against the account average or the prior half-year. */
-export function outliers(rs: Row[], band: Band): Outlier[] {
-  const acct = totals(rs);
+export function outliers(rs: Row[], band: Band, data: Dataset = sampleDataset): Outlier[] {
+  const acct = totals(rs, data);
   const out: Outlier[] = [];
-  for (const s of siteStats(rs)) {
+  for (const s of siteStats(rs, data)) {
     const siteRows = rs.filter((r) => r.site === s.siteId);
-    const prodMix = groupBy(siteRows, productGroup).sort((a, b) => b.allocatedMonths - a.allocatedMonths)[0];
+    const prodMix = groupBy(siteRows, (r) => productGroup(r, data), undefined, data).sort((a, b) => b.allocatedMonths - a.allocatedMonths)[0];
     const vsAvg = pctChange(s.utilisation, acct.utilisation);
     if (s.utilisation < band.low) {
       out.push({
@@ -218,8 +225,8 @@ export function outliers(rs: Row[], band: Band): Outlier[] {
         why: `${(acct.onTimePct - s.onTimePct).toFixed(0)} points below the account's ${acct.onTimePct.toFixed(0)}%. Check pickup schedule with the site manager.`,
       });
     }
-    const h1 = totals(siteRows.filter((r) => H1.includes(r.month)));
-    const h2 = totals(siteRows.filter((r) => H2.includes(r.month)));
+    const h1 = totals(siteRows.filter((r) => Number(r.month.slice(5)) <= 6), data);
+    const h2 = totals(siteRows.filter((r) => Number(r.month.slice(5)) > 6), data);
     const ch = pctChange(h2.utilisation, h1.utilisation);
     if (h1.allocatedMonths && h2.allocatedMonths && Math.abs(ch) > 15) {
       out.push({
@@ -250,12 +257,12 @@ export function exceptionRows(rs: Row[], band: Band) {
     .filter((x) => x.reasons.length);
 }
 
-export function monthlyTrend(rs: Row[]) {
-  return months.map((m) => {
-    const t = totals(rs.filter((r) => r.month === m));
+export function monthlyTrend(rs: Row[], data: Dataset = sampleDataset) {
+  return [...new Set(rs.map((r) => r.month))].sort().map((m) => {
+    const t = totals(rs.filter((r) => r.month === m), data);
     return {
       month: m.slice(5),
-      label: new Date(m + "-01").toLocaleString("en", { month: "short" }),
+      label: new Date(m + "-01").toLocaleString("en", { month: "short", year: "numeric", timeZone: "UTC" }),
       utilisation: +t.utilisation.toFixed(1),
       washed: t.washed,
       repairs: t.repairs,
@@ -265,8 +272,10 @@ export function monthlyTrend(rs: Row[]) {
   });
 }
 
-export function findCustomer(id: string) {
-  return customers.find((c) => c.customer_id === id) ?? customers[0]!;
+export function findCustomer(id: string, data: Dataset = sampleDataset) {
+  const customer = data.customers.find((c) => c.customer_id === id) ?? data.customers[0];
+  if (!customer) throw new Error("No customer accounts available");
+  return customer;
 }
 
 export const fmt = (n: number, d = 0) =>
