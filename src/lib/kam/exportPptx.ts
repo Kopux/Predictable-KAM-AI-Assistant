@@ -1,16 +1,18 @@
 import type { Slide } from "./story";
 import { ATTENDEES, type Attendee } from "./store";
 
-export async function exportPptx(customerName: string, summary: string, slides: Slide[], attendees: Attendee[], aiSession?: string) {
+export async function exportPptx(customerName: string, summary: string, slides: Slide[], attendees: Attendee[], aiSession?: string, isSample = false) {
   const { default: PptxGenJS } = await import("pptxgenjs");
   const pptx = new PptxGenJS();
   pptx.layout = "LAYOUT_WIDE";
   const BG = "00205B";
   const FG = "FFFFFF";
   const ACC = "4FB3E8";
+  const banner = isSample ? "SYNTHETIC DEMO DATA · Not audited" : "DRAFT · KAM must review before customer use";
 
   const title = pptx.addSlide();
   title.background = { color: BG };
+  title.addText(banner, { x: 0.6, y: 0.3, w: 12, fontSize: 10, color: ACC, bold: true });
   title.addText("Customer Value & Sustainability Review 2025", { x: 0.6, y: 1.6, w: 12, fontSize: 18, color: ACC, bold: true });
   title.addText(customerName, { x: 0.6, y: 2.2, w: 12, fontSize: 44, color: FG, bold: true, fontFace: "Arial" });
   title.addText(summary, { x: 0.6, y: 3.6, w: 11.5, h: 2.6, fontSize: 16, color: FG, valign: "top" });
