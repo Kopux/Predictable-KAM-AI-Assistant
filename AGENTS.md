@@ -35,3 +35,4 @@ use the editor.
 - Keep the KAM context object in a separate browser-safe module from its provider so live provider updates cannot disconnect existing consumers.
 - Workbook parsing uses a browser-only dynamic SheetJS import; datasets are retained in local IndexedDB and passed explicitly to metrics to isolate each browser's private data from SSR and other users.
 - Imported month/site/product keys are append-only with existing records winning; previews report skipped keys so re-imports cannot double count or overwrite source data.
+- The "Ask the data" assistant sends only the aggregated per-account summary from `src/lib/kam/aiContext.ts` (never raw rows) to the AI through the `/api/chat` server route; the chat session lives in memory only and is exported as .txt or a PPTX notes slide, so no cloud storage is needed.
