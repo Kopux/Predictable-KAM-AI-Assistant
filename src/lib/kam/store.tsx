@@ -31,6 +31,7 @@ const initial: State = {
   attendees: ["procurement", "sustainability"],
   priorities: ["cost", "co2"],
   hiddenSlides: [],
+  started: false,
 };
 
 export function KamProvider({ children }: { children: ReactNode }) {
@@ -73,7 +74,7 @@ export function KamProvider({ children }: { children: ReactNode }) {
         await saveLocalDataset(merged);
         setData(merged);
         const first = incoming.customers[0];
-        set((p) => ({ ...p, customerId: first?.customer_id ?? p.customerId, year: [...new Set(incoming.rows.map((r) => r.month.slice(0, 4)))].sort().at(-1) ?? "all" }));
+        set((p) => ({ ...p, started: true, customerId: first?.customer_id ?? p.customerId, year: [...new Set(incoming.rows.map((r) => r.month.slice(0, 4)))].sort().at(-1) ?? "all" }));
       },
       hasImports: data !== sampleDataset,
       clearImports: async () => {
@@ -89,6 +90,12 @@ export function KamProvider({ children }: { children: ReactNode }) {
         set((p) => ({ ...p, customerId: findCustomer(p.customerId, remaining).customer_id, year: "last12", excluded: p.excluded.filter((id) => remaining.rows.some((r) => r.id === id)) }));
       },
       customer,
+      startSample: () => {
+        const restore = data.customers.length === 0 ? sampleDataset : data;
+        if (restore !== data) { void saveLocalDataset(restore); setData(restore); }
+        set((p) => ({ ...p, started: true, customerId: findCustomer(p.customerId, restore).customer_id }));
+      },
+      isSample: sampleDataset.customers.some((c) => c.customer_id === customer.customer_id),
       band: s.bands[customer.customer_id] ?? defaultBandFor(customer.industry),
       excludedSet: new Set(s.excluded),
       setCustomer: (id) => set((p) => ({ ...p, customerId: id })),

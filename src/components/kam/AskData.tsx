@@ -77,7 +77,7 @@ export function AskDataChat({ className = "" }: { className?: string }) {
         <ConversationScrollButton />
       </Conversation>
       <PromptInput onSubmit={(msg) => ask(msg.text ?? text)}>
-        <PromptInputTextarea autoFocus value={text} onChange={(e) => setText(e.target.value)} placeholder="e.g. Why is utilisation low at the bakery site?" />
+        <PromptInputTextarea value={text} onChange={(e) => setText(e.target.value)} placeholder="e.g. Why is utilisation low at the bakery site?" />
         <PromptInputFooter>
           <PromptInputTools>
             <Button type="button" variant="ghost" size="sm" disabled={!messages.length}

@@ -3,6 +3,8 @@ import { useMemo, useState } from "react";
 import { Bar, BarChart, Cell, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { AlertTriangle, ArrowRight, Building2, CalendarRange, CheckCircle2, Droplets, Euro, Leaf, MapPin, RotateCcw, Shirt, WashingMachine, Wrench, Eye, EyeOff } from "lucide-react";
 import { useKam } from "@/lib/kam/store";
+import { AskDataChat } from "@/components/kam/AskData";
+import { MessageCircleQuestion } from "lucide-react";
 import {
   allCustomerRows,
   customerRows,
@@ -93,7 +95,13 @@ function Pulse() {
         </div>
       )}
 
-      <SteeringBriefing t={t} band={band} sites={sites} outs={outs} />
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
+        <div className="min-w-0"><SteeringBriefing t={t} band={band} sites={sites} outs={outs} /></div>
+        <section aria-label="Ask the data" className="no-print flex h-[560px] flex-col rounded-2xl border-2 border-accent/40 bg-card p-4 shadow-md">
+          <h2 className="mb-2 flex items-center gap-2 font-display text-lg font-bold"><MessageCircleQuestion className="h-5 w-5 text-accent" /> Ask the data</h2>
+          <AskDataChat className="min-h-0 flex-1" />
+        </section>
+      </div>
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
         <Kpi provenance="Measured" icon={<Shirt className="h-4 w-4" />} label="Garments in circulation" value={fmt(t.inCirculation)} sub={`${fmt(t.wearers)} wearers (latest month)`} />

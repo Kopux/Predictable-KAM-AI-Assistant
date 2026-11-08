@@ -13,6 +13,7 @@ export type State = {
   attendees: Attendee[];
   priorities: Priority[];
   hiddenSlides: string[];
+  started: boolean;
 };
 
 export type KamState = State & {
@@ -34,6 +35,8 @@ export type KamState = State & {
   toggleAttendee: (attendee: Attendee) => void;
   togglePriority: (priority: Priority) => void;
   toggleSlide: (id: string) => void;
+  startSample: () => void;
+  isSample: boolean;
 };
 
 // Keep context identity independent of the provider's Fast Refresh boundary.
