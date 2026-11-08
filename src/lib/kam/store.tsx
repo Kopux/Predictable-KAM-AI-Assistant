@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { sampleDataset, mergeDataset } from "./data";
 import { saveLocalDataset } from "./localDataset";
 import { emptyDataset, removeDataGroups } from "./dataRemoval";
@@ -38,6 +38,7 @@ export function KamProvider({ children }: { children: ReactNode }) {
   const [s, set] = useState<State>(initial);
   const [loaded, setLoaded] = useState(false);
   const [data, setData] = useState(emptyDataset);
+  const savedThisSession = useRef(false);
   const dataReady = true;
 
   useEffect(() => {
@@ -74,7 +75,8 @@ export function KamProvider({ children }: { children: ReactNode }) {
       setYear: (year) => set((p) => ({ ...p, year })),
       importData: async (incoming) => {
         const merged = mergeDataset(data, incoming);
-        await saveLocalDataset(merged, !s.started);
+        await saveLocalDataset(merged, !savedThisSession.current);
+        savedThisSession.current = true;
         setData(merged);
         const first = incoming.customers[0];
         set((p) => ({ ...(p.started ? p : initial), started: true, customerId: first?.customer_id ?? "", year: [...new Set(incoming.rows.map((r) => r.month.slice(0, 4)))].sort().at(-1) ?? "last12" }));
