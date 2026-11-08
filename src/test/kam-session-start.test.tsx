@@ -38,7 +38,9 @@ describe("explicit session start", () => {
     expect(storage.save).not.toHaveBeenCalled();
   });
   it("starts with only the selected workbook, preserves previous saves, and goes blank on remount", async () => {
-    const incoming = { ...structuredClone(sampleDataset), rows: [{ ...sampleDataset.rows[0], month: "2026-01" }] };
+    const first = sampleDataset.rows[0];
+    if (!first) throw new Error("Missing sample fixture row");
+    const incoming = { ...structuredClone(sampleDataset), rows: [{ ...first, month: "2026-01" }] };
     const view = mount();
     await act(async () => current.importData(incoming));
     expect(current.started).toBe(true);
