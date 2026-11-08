@@ -51,6 +51,12 @@ function Meeting() {
           <h1 className="text-4xl font-extrabold">Who's in the room with {customer.customer_name}?</h1>
           <p className="text-muted-foreground">Pick attendees and priorities — the deck and talking points adapt instantly.</p>
         </div>
+        <div className="flex flex-col items-end gap-2">
+          <p className="max-w-md text-right text-sm" aria-live="polite">
+            <span className="font-semibold">Selected attendees:</span> {attendees.map((a) => ATTENDEES.find((x) => x.id === a)?.label).join(", ") || "none"}.{" "}
+            <span className="font-semibold">Selected priorities:</span> {priorities.map((p) => PRIORITIES.find((x) => x.id === p)?.label).join(", ") || "none"}.
+          </p>
+          {!attendees.length && <p role="alert" className="text-sm font-medium text-destructive">Choose at least one attendee</p>}
         <div className="flex gap-2">
           <Button variant="outline" asChild>
             <Link to="/">
@@ -62,6 +68,7 @@ function Meeting() {
               Build the deck <ArrowRight className="ml-1 h-4 w-4" />
             </Link>
           </Button>
+        </div>
         </div>
       </div>
 
@@ -84,8 +91,9 @@ function Meeting() {
                 )}
               >
                 {on && (
-                  <span className="absolute right-4 top-4 grid h-6 w-6 place-items-center rounded-full bg-primary text-primary-foreground">
-                    <Check className="h-4 w-4" />
+                  <span className="absolute right-4 top-4 flex items-center gap-1 text-xs font-semibold text-primary">
+                    Selected
+                    <span className="grid h-6 w-6 place-items-center rounded-full bg-primary text-primary-foreground"><Check className="h-4 w-4" /></span>
                   </span>
                 )}
                 <span className={cn("grid h-12 w-12 place-items-center rounded-xl", on ? "bg-accent text-accent-foreground" : "bg-muted")}>
@@ -119,7 +127,7 @@ function Meeting() {
                   on ? "border-primary bg-primary text-primary-foreground" : "bg-card hover:border-primary/40",
                 )}
               >
-                <Icon className="h-4 w-4" /> {p.label}
+                {on ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />} {p.label}{on && <span className="text-xs font-semibold">Selected</span>}
                 {suggested.has(p.id) && <span className={cn("rounded-full px-2 text-xs", on ? "bg-accent text-accent-foreground" : "bg-secondary")}>suggested</span>}
               </button>
             );
