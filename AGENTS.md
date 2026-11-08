@@ -41,4 +41,6 @@ use the editor.
 - Period filter: `year` state holds "all", a year, or a preset id from `src/lib/kam/period.ts`; presets count back from the account's latest data month so imported data never shows empty ranges.
 - Keep export slides measurable off-screen with non-animated charts; wait for chart readiness before printing or capturing local PNGs for PowerPoint, preserving the active data and editable slide text.
 - Keep executive UI treatments in semantic global tokens and shared KAM presentation components; metric provenance is an optional display prop so visual redesigns do not alter calculations or export slides.
-- A persisted `started` flag in KAM state gates all account screens behind a blank start (upload or "Try with sample data"), so first visits show no figures until the user chooses data.
+- Keep `started` session-only and initialize with an empty dataset on every full load; explicit sample/workbook choices start fresh, while client navigation retains the provider so the meeting continues.
+- Never restore IndexedDB data automatically; archive the previous active snapshot before the first workbook save of a new session so saved work survives fresh starts.
+- Generate chat suggestions through the browser-safe `chatStarters` helper so every attendee/priority selection gets exactly three distinct questions.

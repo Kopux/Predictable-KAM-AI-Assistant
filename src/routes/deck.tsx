@@ -112,7 +112,7 @@ function Deck() {
               }
             }}
           >
-            <Download className="mr-1 h-4 w-4" /> {busy ? "Preparing…" : "PowerPoint"}
+            <Download className="mr-1 h-4 w-4" /> {busy ? "Preparing…" : "PowerPoint DRAFT"}
           </Button>
           <Button
             variant="outline"

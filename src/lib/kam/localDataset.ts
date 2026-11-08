@@ -36,11 +36,19 @@ export async function clearLocalDataset(): Promise<void> {
   });
 }
 
-export async function saveLocalDataset(data: Dataset): Promise<void> {
+export async function saveLocalDataset(data: Dataset, preservePrevious = false): Promise<void> {
   const db = await open();
   return new Promise((resolve, reject) => {
     const transaction = db.transaction("datasets", "readwrite");
-    transaction.objectStore("datasets").put(data, "active");
+    const store = transaction.objectStore("datasets");
+    if (preservePrevious) {
+      // A new session must not destroy work saved by a previous session.
+      const previous = store.get("active");
+      previous.onsuccess = () => {
+        if (previous.result) store.put(previous.result, `archive:${crypto.randomUUID()}`);
+        store.put(data, "active");
+      };
+    } else store.put(data, "active");
     transaction.oncomplete = () => { db.close(); resolve(); };
     transaction.onerror = () => { db.close(); reject(transaction.error); };
   });

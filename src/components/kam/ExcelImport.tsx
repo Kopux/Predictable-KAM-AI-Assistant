@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { FileSpreadsheet, Upload, ShieldCheck, AlertTriangle, CheckCircle2, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
@@ -8,7 +9,8 @@ import type { ImportPreview } from "@/lib/kam/importWorkbook";
 import { DataRemoval } from "./DataRemoval";
 
 export function ExcelImport() {
-  const { data, importData, dataReady } = useKam();
+  const { data, importData, dataReady, started } = useKam();
+  const navigate = useNavigate();
   const removeFile = () => { setPreview(null); setFilename(""); setError(""); setSuccess(""); };
   const input = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
@@ -68,7 +70,7 @@ export function ExcelImport() {
             <div className="max-h-56 overflow-auto"><table className="w-full text-xs"><thead><tr>{sheet?.columns.map((c, i) => <th key={`${c}-${i}`} className="whitespace-nowrap border-b bg-muted p-2 text-left font-medium">{c}</th>)}</tr></thead><tbody>{sheet?.preview.map((r, i) => <tr key={i}>{sheet.columns.map((c, j) => <td key={`${c}-${j}`} className="max-w-64 truncate border-b p-2">{r[c] instanceof Date ? (r[c] as Date).toISOString().slice(0, 10) : String(r[c] ?? "")}</td>)}</tr>)}</tbody></table></div>
             <p className="mt-2 text-xs text-muted-foreground">Showing first {sheet?.preview.length ?? 0} of {sheet?.count ?? 0} rows.</p>
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-4"><span className="flex items-center gap-1.5 text-xs text-muted-foreground"><ShieldCheck className="h-4 w-4" /> Saved only in this browser on this device</span><Button disabled={busy || preview.errors.length > 0 || newRows === 0 || !!success} onClick={async () => { setBusy(true); setError(""); try { await importData(preview.data); setSuccess(`${newRows.toLocaleString()} data lines imported. Accounts and years are ready in the meeting steps.`); } catch { setError("Your browser could not save the imported data. Free device storage or allow browser storage, then try again."); } finally { setBusy(false); } }}><CheckCircle2 className="h-4 w-4" />{busy ? "Saving…" : "Import validated data"}</Button></div>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-4"><span className="flex items-center gap-1.5 text-xs text-muted-foreground"><ShieldCheck className="h-4 w-4" /> Saved only in this browser on this device</span><Button disabled={busy || preview.errors.length > 0 || newRows === 0 || !!success} onClick={async () => { setBusy(true); setError(""); try { await importData(preview.data); setSuccess(`${newRows.toLocaleString()} data lines imported. Accounts and years are ready in the meeting steps.`); if (!started) { setOpen(false); void navigate({ to: "/" }); } } catch { setError("Your browser could not save the imported data. Free device storage or allow browser storage, then try again."); } finally { setBusy(false); } }}><CheckCircle2 className="h-4 w-4" />{busy ? "Saving…" : "Import validated data"}</Button></div>
         </>}
       </DialogContent>
     </Dialog>

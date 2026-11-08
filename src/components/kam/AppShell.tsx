@@ -95,7 +95,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <span className="ml-auto shrink-0 rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">{periodLabel(year)}</span>
         </div>
       )}
-      <main className="mx-auto max-w-7xl px-4 py-6">{!started ? <BlankStart onSample={startSample} /> : dataReady && data.customers.length === 0 ? <div className="py-12 text-center"><FileSpreadsheet className="mx-auto mb-4 h-10 w-10 text-primary" /><h1 className="font-display text-2xl font-bold">No company data</h1><p className="mt-2 text-muted-foreground">Import an Excel workbook to start a meeting.</p></div> : children}</main>
+      <main className="mx-auto max-w-7xl px-4 py-6">{!started ? <BlankStart onSample={() => { startSample(); void navigate({ to: "/" }); }} /> : dataReady && data.customers.length === 0 ? <div className="py-12 text-center"><FileSpreadsheet className="mx-auto mb-4 h-10 w-10 text-primary" /><h1 className="font-display text-2xl font-bold">No company data</h1><p className="mt-2 text-muted-foreground">Import an Excel workbook to start a meeting.</p></div> : children}</main>
       {started && data.customers.length > 0 && <div className="sm:hidden"><AskDataButton floating /></div>}
     </div>
   );

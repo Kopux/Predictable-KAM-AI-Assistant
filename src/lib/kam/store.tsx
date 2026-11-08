@@ -1,6 +1,6 @@
 import { useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { sampleDataset, mergeDataset } from "./data";
-import { readLocalDataset, saveLocalDataset } from "./localDataset";
+import { saveLocalDataset } from "./localDataset";
 import { emptyDataset, removeDataGroups } from "./dataRemoval";
 import { defaultBandFor, findCustomer } from "./metrics";
 import { PRESETS } from "./period";
@@ -37,24 +37,27 @@ const initial: State = {
 export function KamProvider({ children }: { children: ReactNode }) {
   const [s, set] = useState<State>(initial);
   const [loaded, setLoaded] = useState(false);
-  const [data, setData] = useState(sampleDataset);
-  const [dataReady, setDataReady] = useState(false);
-
-  useEffect(() => {
-    readLocalDataset().then((saved) => { if (saved) setData(saved); }).catch(() => {}).finally(() => setDataReady(true));
-  }, []);
+  const [data, setData] = useState(emptyDataset);
+  const dataReady = true;
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(KEY);
-      if (raw) set({ ...initial, ...JSON.parse(raw) });
+      if (raw) {
+        const { started: _legacyStarted, ...saved } = JSON.parse(raw);
+        set({ ...initial, ...saved, started: false });
+        localStorage.setItem(KEY, JSON.stringify(saved));
+      }
     } catch {
       /* ignore corrupt storage */
     }
     setLoaded(true);
   }, []);
   useEffect(() => {
-    if (loaded) localStorage.setItem(KEY, JSON.stringify(s));
+    if (loaded) {
+      const { started: _sessionOnly, ...saved } = s;
+      localStorage.setItem(KEY, JSON.stringify(saved));
+    }
   }, [s, loaded]);
 
   const value = useMemo<KamState>(() => {
@@ -71,12 +74,12 @@ export function KamProvider({ children }: { children: ReactNode }) {
       setYear: (year) => set((p) => ({ ...p, year })),
       importData: async (incoming) => {
         const merged = mergeDataset(data, incoming);
-        await saveLocalDataset(merged);
+        await saveLocalDataset(merged, !s.started);
         setData(merged);
         const first = incoming.customers[0];
-        set((p) => ({ ...p, started: true, customerId: first?.customer_id ?? p.customerId, year: [...new Set(incoming.rows.map((r) => r.month.slice(0, 4)))].sort().at(-1) ?? "all" }));
+        set((p) => ({ ...(p.started ? p : initial), started: true, customerId: first?.customer_id ?? "", year: [...new Set(incoming.rows.map((r) => r.month.slice(0, 4)))].sort().at(-1) ?? "last12" }));
       },
-      hasImports: data !== sampleDataset,
+      hasImports: s.started && data.customers.length > 0,
       clearImports: async () => {
         const empty = emptyDataset();
         await saveLocalDataset(empty);
@@ -91,9 +94,9 @@ export function KamProvider({ children }: { children: ReactNode }) {
       },
       customer,
       startSample: () => {
-        const restore = data.customers.length === 0 ? sampleDataset : data;
-        if (restore !== data) { void saveLocalDataset(restore); setData(restore); }
-        set((p) => ({ ...p, started: true, customerId: findCustomer(p.customerId, restore).customer_id }));
+        const fresh = structuredClone(sampleDataset);
+        setData(fresh);
+        set({ ...initial, started: true, customerId: findCustomer("", fresh).customer_id });
       },
       isSample: sampleDataset.customers.some((c) => c.customer_id === customer.customer_id),
       band: s.bands[customer.customer_id] ?? defaultBandFor(customer.industry),
