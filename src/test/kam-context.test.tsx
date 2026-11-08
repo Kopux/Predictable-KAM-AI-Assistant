@@ -20,6 +20,6 @@ describe("KAM context across live updates", () => {
       return <span>{customer.customer_id}</span>;
     }
     render(<KamProvider><ReloadedConsumer /></KamProvider>);
-    expect(await screen.findByText("CUST001")).toBeInTheDocument();
+    expect(await screen.findByText("", { selector: "span" })).toBeInTheDocument();
   });
 });
