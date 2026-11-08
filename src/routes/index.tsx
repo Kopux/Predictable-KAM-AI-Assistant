@@ -109,7 +109,7 @@ function Pulse() {
         <div className="lg:col-span-2">
         <Section
           title="Garment utilisation"
-          desc="Weekly washes compared with garments allocated. Too low = idle stock, too high = wearers may run short."
+          desc="Weekly washes compared with garments allocated. Below the band may mean spare stock, above may mean wearers run short — confirm with the customer."
         >
           <div className="flex items-end gap-3">
             <span className={`font-display text-6xl font-extrabold ${inBand ? "text-success" : "text-warning"}`}>{t.utilisation.toFixed(0)}%</span>

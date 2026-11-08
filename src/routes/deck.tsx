@@ -59,8 +59,9 @@ function Deck() {
     <div className="space-y-6">
       <div className="no-print flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wider text-accent">Step 3 · Client-ready deck</p>
+          <p className="text-sm font-semibold uppercase tracking-wider text-accent">Step 3 · Draft deck for review</p>
           <h1 className="text-4xl font-extrabold">{customer.customer_name} review</h1>
+          <p className="text-sm font-medium text-warning">Review the figures, assumptions and wording before customer use.</p>
           <p className="text-muted-foreground">
             For {attendees.map((a) => ATTENDEES.find((x) => x.id === a)?.label).join(", ") || "no attendees selected"}
           </p>

@@ -51,5 +51,5 @@ export async function exportPptx(customerName: string, summary: string, slides: 
     qa.addNotes(aiSession);
   }
 
-  await pptx.writeFile({ fileName: `${customerName.replace(/\s+/g, "_")}_review_2025.pptx` });
+  await pptx.writeFile({ fileName: `${customerName.replace(/\s+/g, "_")}_review_2025_DRAFT.pptx` });
 }

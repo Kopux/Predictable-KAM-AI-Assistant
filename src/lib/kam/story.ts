@@ -68,13 +68,13 @@ export function buildDeck(
       ],
       bullets: [
         low.length
-          ? `${low.map((s) => s.name).slice(0, 3).join(", ")} sit below the healthy band — about ${fmt(releasable)} pieces could be released`
-          : "All sites sit at or above the healthy band",
+          ? `${low.map((s) => s.name).slice(0, 3).join(", ")} sit below the configured band — about ${fmt(releasable)} pieces to review with the customer (indicator, not proof of idle stock)`
+          : "Utilisation is within the configured band. Confirm stock needs with the customer.",
         high.length ? `${high.map((s) => s.name).slice(0, 3).join(", ")} may need extra pieces to protect availability` : "No site is running short of garments",
       ],
       talking: {
         procurement: [
-          low.length ? `Right-sizing ${low.length} sites could release ~${fmt(releasable)} garments from the contract.` : "Garment levels match actual use — the contract is well sized.",
+          low.length ? `${low.length} sites sit below the configured band (~${fmt(releasable)} garments, estimate). Review allocation with the customer before changing the contract.` : "Utilisation is within the configured band. Confirm stock needs with the customer.",
         ],
         operations: [
           high.length ? `${high[0]?.name} washes garments very often — are wearers ever short?` : "Ask whether lockers feel over-stocked at any site.",
@@ -210,13 +210,13 @@ export function buildDeck(
   const summary = [
     `In ${period} we served ${fmt(t.wearers)} wearers at ${sites.length} ${customerName} sites with ${fmt(t.inCirculation)} garments in circulation.`,
     priorities.includes("cost") || attendees.includes("procurement")
-      ? `Repairs avoided an estimated €${fmtK(t.costAvoided)} in replacement purchases${low.length ? `, and right-sizing ${low.length} under-used sites could release ~${fmt(releasable)} garments` : ""}.`
+      ? `Repairs avoided an estimated €${fmtK(t.costAvoided)} in replacement purchases${low.length ? `, and ${low.length} sites below the configured band (~${fmt(releasable)} garments, estimate) are worth reviewing` : ""}.`
       : "",
     priorities.includes("co2") || attendees.includes("sustainability")
       ? `Compared with local laundry, the service saved ${fmt(t.co2Saved / 1000, 1)} t CO₂e and ${fmt(t.waterSaved / 1000)} m³ of water.`
       : "",
     priorities.includes("recycling") && hasRecycling ? `${recyclePct.toFixed(0)}% of end-of-life textiles were recycled or reused.` : "",
-    `Utilisation is ${t.utilisation.toFixed(0)}% (healthy band ${band.low}–${band.high}%) ${hasCycles ? `and ${t.onTimePct.toFixed(0)}% of cycles were on time` : "— service timing data was not supplied"}.`,
+    `Utilisation is ${t.utilisation.toFixed(0)}% (configured band ${band.low}–${band.high}%)${t.utilisation >= band.low && t.utilisation <= band.high ? " — within the configured band; confirm stock needs with the customer" : ""}. ${hasCycles ? `Service indicator to review: ${t.onTimePct.toFixed(0)}% of cycles on time.` : "Service timing data was not supplied."}`,
   ]
     .filter(Boolean)
     .join(" ");

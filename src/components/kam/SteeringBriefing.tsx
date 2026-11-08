@@ -26,22 +26,22 @@ export function buildSteeringQuestions(t: Totals, band: Band, sites: SiteStat[],
       icon: <Shirt className="h-4 w-4" />,
       q: "Are we paying for garments our people actually use?",
       answer: inBand
-        ? `Yes — ${t.utilisation.toFixed(0)}% utilisation, inside the healthy ${band.low}–${band.high}% band.`
-        : `${t.utilisation.toFixed(0)}% utilisation, ${t.utilisation < band.low ? "below" : "above"} the healthy ${band.low}–${band.high}% band.`,
+        ? `${t.utilisation.toFixed(0)}% utilisation. Utilisation is within the configured band. Confirm stock needs with the customer.`
+        : `${t.utilisation.toFixed(0)}% utilisation, ${t.utilisation < band.low ? "below" : "above"} the configured ${band.low}–${band.high}% band. Review with the customer.`,
       detail: `${fmt(t.inCirculation)} garments for ${fmt(t.wearers)} wearers. ${low.length} site(s) under-used, ${high.length} running tight.`,
       tone: inBand ? "good" : "watch",
     },
     {
       icon: <PiggyBank className="h-4 w-4" />,
       q: "Where can we save money?",
-      answer: idle > 0 ? `~${fmt(idle)} idle garments could be released.` : "No major idle stock — allocation is lean.",
+      answer: idle > 0 ? `~${fmt(idle)} garments (estimate) at sites below the band — review with the customer.` : "Utilisation is within the configured band. Confirm stock needs with the customer.",
       detail: `Renting instead of buying already avoided an estimated €${fmtK(t.costAvoided)}.${low[0] ? ` Biggest opportunity: ${low[0].name}.` : ""}`,
       tone: idle > 0 ? "watch" : "good",
     },
     {
       icon: <ShieldCheck className="h-4 w-4" />,
       q: "Is the service reliable and hygienic?",
-      answer: `${t.onTimePct.toFixed(0)}% of wash cycles on time; ${t.repairRate.toFixed(2)} repairs per 100 washes.`,
+      answer: `Indicators to review: ${t.onTimePct.toFixed(0)}% of wash cycles on time; ${t.repairRate.toFixed(2)} repairs per 100 washes.`,
       detail: worstRepair ? `Highest repair rate: ${worstRepair.name} (${worstRepair.repairRate.toFixed(2)}). ${acts.length} issue(s) need action.` : "",
       tone: t.onTimePct >= 95 && acts.length === 0 ? "good" : acts.length ? "act" : "watch",
     },
