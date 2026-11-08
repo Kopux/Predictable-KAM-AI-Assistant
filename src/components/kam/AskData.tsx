@@ -14,12 +14,12 @@ function useStarters() {
   const { attendees, priorities } = useKam();
   return useMemo(() => {
     const s = ["Which site needs attention first, and why?"];
-    if (attendees.includes("procurement") || priorities.includes("cost")) s.push("Where are we over-stocked on garments, and what could it save?");
+    if (attendees.includes("procurement") || priorities.includes("cost")) s.push("Which sites sit outside the utilisation band, and what should I confirm?");
     if (attendees.includes("sustainability") || priorities.includes("co2")) s.push("How do I explain our CO₂ and water savings to a sustainability lead?");
     if (priorities.includes("recycling")) s.push("What does the data say about textile recycling?");
     if (attendees.includes("operations")) s.push("Which sites have late deliveries or high repairs?");
     s.push("Give me three talking points for this meeting.");
-    return s.slice(0, 4);
+    return s.slice(0, 3);
   }, [attendees, priorities]);
 }
 
@@ -77,7 +77,7 @@ export function AskDataChat({ className = "" }: { className?: string }) {
         <ConversationScrollButton />
       </Conversation>
       <PromptInput onSubmit={(msg) => ask(msg.text ?? text)}>
-        <PromptInputTextarea autoFocus value={text} onChange={(e) => setText(e.target.value)} placeholder="e.g. Why is utilisation low at the bakery site?" />
+        <PromptInputTextarea value={text} onChange={(e) => setText(e.target.value)} placeholder="e.g. Why is utilisation low at the bakery site?" />
         <PromptInputFooter>
           <PromptInputTools>
             <Button type="button" variant="ghost" size="sm" disabled={!messages.length}
@@ -91,6 +91,7 @@ export function AskDataChat({ className = "" }: { className?: string }) {
           <PromptInputSubmit status={status} disabled={!text.trim() && status === "ready"} />
         </PromptInputFooter>
       </PromptInput>
+      <p className="text-xs text-muted-foreground">Answers use a summary of the selected account's figures. Review before sharing.</p>
     </div>
   );
 }

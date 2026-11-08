@@ -60,6 +60,7 @@ export function ExcelImport() {
           <div className="text-sm"><p className="font-medium">{preview.errors.length ? `${preview.errors.length} validation errors — correct these before importing` : "Worksheet and column validation passed"}</p>
             {preview.errors.length > 0 && <ul role="alert" className="mt-2 max-h-40 space-y-1 overflow-y-auto text-destructive">{preview.errors.map((s) => <li key={s}>{s}</li>)}</ul>}
             {preview.warnings.length > 0 && <details className="mt-3" open><summary className="cursor-pointer font-medium text-warning"><AlertTriangle className="mr-1 inline h-4 w-4" />{preview.warnings.length} exceptions / notes</summary><ul className="mt-2 max-h-36 space-y-1 overflow-y-auto text-muted-foreground">{preview.warnings.map((s) => <li key={s}>{s}</li>)}</ul></details>}
+            {preview.errors.length === 0 && preview.data.rows.length > 0 && newRows === 0 && !success && <div role="status" className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/30 bg-secondary p-3"><p className="font-medium">This workbook is already loaded. No new rows will be added; existing data is unchanged.</p><Button size="sm" variant="outline" onClick={() => { removeFile(); setOpen(false); }}>Return to account</Button></div>}
             {preview.duplicates > 0 && <p className="mt-2 text-muted-foreground">Matching month, site and product lines will be skipped. Existing data and account details will not be overwritten.</p>}
           </div>
           <div className="min-w-0 border-t pt-3">

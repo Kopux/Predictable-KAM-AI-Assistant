@@ -3,7 +3,7 @@ import { Building2, CalendarRange, CalendarDays, Check, Search } from "lucide-re
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
-import { customPeriod, monthName, periodLabel, periodRange } from "@/lib/kam/period";
+import { inPeriod, customPeriod, monthName, periodLabel, periodRange } from "@/lib/kam/period";
 import { ExcelImport } from "./ExcelImport";
 import { AskDataButton } from "./AskData";
 import { useKam } from "@/lib/kam/store";
@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils";
 
 export function ContextBar() {
-  const { customer, setCustomer, data, year, years, setYear } = useKam();
+  const { customer, setCustomer, data, year, years, setYear, isSample } = useKam();
   const info = useMemo(() => {
     const sites = data.sites.filter((s) => s.customer_id === customer.customer_id);
     const ids = new Set(sites.map((s) => s.site_id));
@@ -30,6 +30,7 @@ export function ContextBar() {
   const [to, setTo] = useState("");
   const isCustom = year.startsWith("custom:") || years.includes(year);
   const cur = periodRange(year, info.months);
+  const used = info.months.filter((m) => inPeriod(m, year, info.months));
 
   const chip = (active: boolean, disabled = false) =>
     cn(
@@ -128,12 +129,20 @@ export function ContextBar() {
             <button role="radio" aria-checked={year === "all"} onClick={() => setYear("all")} className={chip(year === "all")}>All</button>
           </div>
           </div>
+          <span className="text-xs font-medium text-muted-foreground" aria-live="polite">
+            {used.length ? `Data used: ${monthName(used[0]!)} – ${monthName(used.at(-1)!)}` : "No data for this period"}
+          </span>
         </div>
 
         <div className="hidden sm:block lg:ml-auto">
           {data.customers.length > 0 && <AskDataButton />}
         </div>
       </div>
+      {isSample && (
+        <p role="note" className="mx-auto max-w-7xl px-4 pb-2 text-xs font-medium text-warning">
+          Synthetic demo data. Not audited. Draft outputs for human review.
+        </p>
+      )}
     </div>
   );
 }
