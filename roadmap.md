@@ -1,4 +1,9 @@
 # Excel import
+# Final session and review fixes
+- [ ] Start blank on every full load with explicit fresh data choice; preserve saved work.
+- [ ] Label PowerPoint DRAFT and sustainability savings Estimated.
+- [ ] Always offer three distinct chat suggestions and verify all requested flows.
+
 - [x] Add searchable company/year removal choices including demo data and persist deletion.
 - [x] Verify selective removal, remove-all, reload and re-import flows.
 - [x] Validate and aggregate reference-schema workbooks entirely in the browser.
