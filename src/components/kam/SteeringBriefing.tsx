@@ -48,7 +48,7 @@ export function buildSteeringQuestions(t: Totals, band: Band, sites: SiteStat[],
     {
       icon: <Leaf className="h-4 w-4" />,
       q: "What sustainability results can we report to our board?",
-      answer: `${fmt(t.co2Saved / 1000, 1)} t CO₂e and ${fmt(t.waterSaved / 1000)} m³ water saved vs local laundry.`,
+      answer: `Estimated savings: ${fmt(t.co2Saved / 1000, 1)} t CO₂e and ${fmt(t.waterSaved / 1000)} m³ water versus the local laundry baseline.`,
       detail: t.textileWaste > 0 ? `${recycledPct.toFixed(0)}% of textile waste recycled or reused.` : "No textile recycling data in this period.",
       tone: "good",
     },

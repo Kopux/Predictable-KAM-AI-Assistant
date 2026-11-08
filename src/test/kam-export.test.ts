@@ -24,6 +24,7 @@ describe("presentation graph export", () => {
     expect(mocks.addImage).toHaveBeenCalledWith(expect.objectContaining({ data: image }));
     expect(mocks.addNotes).toHaveBeenCalledWith(expect.stringContaining("Review allocation"));
     expect(mocks.writeFile).toHaveBeenCalledOnce();
+    expect(mocks.writeFile).toHaveBeenCalledWith({ fileName: "Customer_review_2025_DRAFT.pptx" });
   });
   it("does not silently download a graph slide without its graph", async () => {
     await expect(exportPptx("Customer", "Summary", [slide], [])).rejects.toThrow("Missing graph");

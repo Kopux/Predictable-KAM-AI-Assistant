@@ -9,18 +9,11 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { useKam } from "@/lib/kam/store";
 import { buildAiContext } from "@/lib/kam/aiContext";
 import { downloadText, getChatSession, messageText, sessionTranscript } from "@/lib/kam/chatSession";
+import { suggestedQuestions } from "@/lib/kam/chatStarters";
 
 function useStarters() {
   const { attendees, priorities } = useKam();
-  return useMemo(() => {
-    const s = ["Which site needs attention first, and why?"];
-    if (attendees.includes("procurement") || priorities.includes("cost")) s.push("Which sites sit outside the utilisation band, and what should I confirm?");
-    if (attendees.includes("sustainability") || priorities.includes("co2")) s.push("How do I explain our CO₂ and water savings to a sustainability lead?");
-    if (priorities.includes("recycling")) s.push("What does the data say about textile recycling?");
-    if (attendees.includes("operations")) s.push("Which sites have late deliveries or high repairs?");
-    s.push("Give me three talking points for this meeting.");
-    return s.slice(0, 3);
-  }, [attendees, priorities]);
+  return useMemo(() => suggestedQuestions(attendees, priorities), [attendees, priorities]);
 }
 
 export function AskDataChat({ className = "" }: { className?: string }) {
